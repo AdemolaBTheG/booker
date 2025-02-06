@@ -1,74 +1,81 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View, Pressable } from "react-native";
+import { Icon } from '@/components/ui/Icon';
+import { FlashList } from "@shopify/flash-list";
+import { Link, router } from "expo-router";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const items = [
 
-export default function HomeScreen() {
+  {
+
+    icon:'book',
+    title: 'Library',
+    href: '/library'
+  },
+  {
+
+    icon:'collections',
+    title: 'Collection',
+    href: '/collection'
+  },
+  {
+
+    icon:'category',
+    title: 'Category',
+    href: '/category'
+  },
+  {
+
+    icon:'person',
+    title: 'Author',
+    href: '/author'
+  },
+  {
+
+    icon:'house',
+    title: 'Publisher',
+    href: '/publisher'
+  },
+  
+
+
+
+]
+
+export default function Index() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
+    <ScrollView className="flex-1 bg-black">
+       <View className="flex-1  px-4">
+      <Text className="text-white text-4xl font-semibold mt-5">Booker</Text>
+      <View className="rounded-lg bg-white/20 px-2 py-3 mt-10 gap-3 flex items-center justify-center">
+        <Text className="text-white/40  text-base text-center">Add Your First Book & Transform Your Reading Journey - Start Tracking Today!</Text>
+        <TouchableOpacity onPress={() => router.push('/add')} className="bg-cta rounded-lg px-4 py-2 mt-2 flex-row items-center">
+          <Icon name="add" size={20} />
+          <Text  className="text-white font-semibold ml-1">Add Your First Book</Text>
+        </TouchableOpacity>
+      </View>
+      <View className="mt-6">
+        <Text className="text-white text-xl font-semibold">Bookshelf</Text>
+        <View className="flex-col mt-4 gap-3">
+          {items.map((item) => (
+            <Link href='/index' key={item.title} asChild>
+              <Pressable className="flex-row items-center justify-between bg-white/20 px-2 py-3 rounded-lg active:opacity-70"> 
+                <View className="flex-row items-center gap-3">
+                  <Icon name={item.icon as any} size={24} color="white" />
+                  <Text className="text-white text-base font-semibold">{item.title}</Text>
+                </View>
+                <Icon 
+                  name="chevron-right" 
+                  size={24} 
+                  color="rgba(255, 255, 255, 0.2)"
+                />
+              </Pressable>
+            </Link>
+          ))}
+        </View>
+      </View>
+    </View>
+    </ScrollView>
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+  );
+   
+}
