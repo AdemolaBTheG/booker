@@ -11,7 +11,9 @@ export default function TabLayout() {
     <View style={{ flex: 1, backgroundColor: '#000000' }}>
       <BlurView intensity={80} style={{ flex: 1 }}>
         <Tabs
+        
           screenOptions={{
+            
             tabBarStyle: {
               backgroundColor: 'transparent',
               borderTopColor: 'rgba(255, 255, 255, 0.1)',
@@ -30,22 +32,28 @@ export default function TabLayout() {
                 }}
               />
             ),
+            
             headerStyle: {
               backgroundColor: '#000000',
             },
+            
+         
             headerTitleStyle: {
               color: 'white',
             },
+
             headerShadowVisible: true,
             tabBarActiveTintColor: 'white',
             tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.4)',
            
           }}>
           <Tabs.Screen name="index" options={{
-              title: 'Home',
+              headerShown: true,
+              headerTitle: 'Home',
               headerRight: () => (
                 <Pressable 
-                  onPress={() => router.push('/add')}
+                  onPress={() => router.push('/(add)')}
+
 
                   className='bg-cta rounded-full p-2 mr-4'
                 >

@@ -28,12 +28,21 @@ export default function RootLayout() {
       <Stack 
         screenOptions={{
           contentStyle: {
-            
+            backgroundColor: '#000000'
+          
           },
+        
         }} 
       >
         <Stack.Screen 
           name="(tabs)" 
+          options={{ 
+            headerShown: false,
+            headerShadowVisible: true,
+          }} 
+        />
+        <Stack.Screen 
+          name="index" 
           options={{ 
             headerShown: false,
           }} 
@@ -41,10 +50,12 @@ export default function RootLayout() {
         <Stack.Screen 
           name="(add)" 
           options={{ 
-            headerShown: true,
+            headerShown: false,
+            presentation: 'modal',
+        
+            
           }} 
         />
-      
        
       </Stack>
     </GestureHandlerRootView>
