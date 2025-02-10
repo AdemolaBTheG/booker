@@ -56,6 +56,13 @@ export default function RootLayout() {
             
           }} 
         />
+        <Stack.Screen 
+          name="(permissions)" 
+          options={{ 
+            headerShown: false,
+            presentation: 'card',
+          }} 
+        />
        
       </Stack>
     </GestureHandlerRootView>

@@ -57,18 +57,18 @@ export default function TabLayout() {
 
                   className='bg-cta rounded-full p-2 mr-4'
                 >
-                  <Icon name="add" size={20} color="white" />
+                  <Icon name="add" size={20} color="white" type="material" />
   
                 </Pressable>
               ),
               tabBarIcon: ({ color }) => (
-                  <Icon name="home" color={color} size={24} />
+                  <Icon name="home" color={color} size={24} type="material" />
               ),
           }} />
           <Tabs.Screen name="statistics" options={{
               title: 'Statistics',
               tabBarIcon: ({ color }) => (
-                  <Icon name="auto-graph" color={color} size={24} />
+                  <Icon name="auto-graph" color={color} size={24} type="material" />
               ),
           }} />
         <Tabs.Screen name="(add)" options={{

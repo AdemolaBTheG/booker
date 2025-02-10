@@ -44,8 +44,13 @@ export default function AddLayout() {
             headerShown: true,
             headerTitle: 'Book Details',
         }} />
+        <Stack.Screen name="barcode" options={{
+            headerShown: true,
+            headerTitle: 'Barcode',
+        }} />
     </Stack>
   )
+
 
 
 

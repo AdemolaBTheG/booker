@@ -63,7 +63,7 @@ function bookItem({ item}: {item: Book}) {
                 className='inline-flex flex-row items-center gap-1 rounded-lg px-2 py-1'
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
             >
-                <Icon name='add' size={24} color='white' />
+                <Icon name='add' size={24} color='white' type='material' />
                 <Text className='text-white text-sm font-semibold'>Add Book</Text>
             </TouchableOpacity>
            
@@ -71,6 +71,32 @@ function bookItem({ item}: {item: Book}) {
         </View>
     </Link>
        
+    )
+}
+
+function SearchBar({ onChangeText, value }: { onChangeText: (text: string) => void, value: string }) {
+    return (
+        <View className='flex items-center justify-center py-5 px-4 border-b border-white/20'>
+            <View className='flex-row gap-1 items-center bg-white/10 rounded-2xl px-2 py-2'>
+                <Icon 
+                    name='search' 
+                    size={28} 
+                    color="rgba(255, 255, 255, 0.4)"
+                    type='material'
+
+                />
+                <TextInput 
+                    className='flex-1 text-white' 
+                    placeholder='Search' 
+                    value={value}
+                    onChangeText={onChangeText}
+                    placeholderTextColor='rgba(255, 255, 255, 0.4)'
+                    textAlignVertical="center"
+                    textAlign='left'
+                    style={{fontSize: 18}}
+                />
+            </View>
+        </View>
     )
 }
 
@@ -87,33 +113,37 @@ export default function Index() {
             setBooks([]);
             return;
         }
+        if(query.length > 2){
+            
+            setIsLoading(true);
 
-        setIsLoading(true);
-
-        const timeoutId = setTimeout(async () => {
-            try {
-                console.log('Searching for:', query);
-                const results = await booksService.searchBooks(query);
-               
-                console.log(results[0].volumeId);
-                if (!Array.isArray(results)) {
-                    console.error('Results is not an array:', results);
+            const timeoutId = setTimeout(async () => {
+                try {
+                    console.log('Searching for:', query);
+                    const results = await booksService.searchBooks(query);
+                   
+                    console.log(results[0].volumeId);
+                    if (!Array.isArray(results)) {
+                        console.error('Results is not an array:', results);
+                        setBooks([]);
+                        return;
+                    }
+                    setBooks(results);
+                } catch (error) {
+                    console.error('Search failed:', {
+                        error,
+                        message: error instanceof Error ? error.message : 'Unknown error'
+                    });
                     setBooks([]);
-                    return;
+                } finally {
+                    setIsLoading(false);
                 }
-                setBooks(results);
-            } catch (error) {
-                console.error('Search failed:', {
-                    error,
-                    message: error instanceof Error ? error.message : 'Unknown error'
-                });
-                setBooks([]);
-            } finally {
-                setIsLoading(false);
-            }
-        }, 500);
+            }, 500);
+    
+            return () => clearTimeout(timeoutId);
 
-        return () => clearTimeout(timeoutId);
+        }
+       
     }, [query]);
 
 
@@ -121,32 +151,7 @@ export default function Index() {
   return (
     <View className='flex-1  '>
 
-        <View className='flex items-center justify-center py-5  px-4  border-b border-white/20'>
-        <View className='flex-row  gap-1   items-center bg-white/10 rounded-2xl px-2 py-2 ' >
-            <Icon 
-                name='search' 
-
-
-                size={28} 
-                color="rgba(255, 255, 255, 0.4)"
-
-
-
-            />
-            <TextInput 
-                className='flex-1 text-white  ' 
-                placeholder='Search' 
-                value={query}
-                onChangeText={setQuery}
-                placeholderTextColor='rgba(255, 255, 255, 0.4)'
-                textAlignVertical="center"
-                textAlign='left'
-                style={{fontSize: 18}}
-
-            />
-        </View>
-        </View>
-        
+      <SearchBar onChangeText={setQuery} value={query} />
      <ScrollView className='flex-1 px-4' contentInsetAdjustmentBehavior='automatic'>
        
       
@@ -158,19 +163,20 @@ export default function Index() {
             (<FlashList data={isLoading ? skeletonItems : books} renderItem={isLoading ? skeletonBookItem :  bookItem}  estimatedItemSize={112}/>)
 
 
-           : (<><View className='flex-row items-center gap-4 py-4  p-2 border-white/20 border-b '>
-
-
-                <Icon name='qr-code' size={28} color='white' />
+           : (<><Link href='/barcode'>
+           
+           <View className='flex-row items-center gap-4 py-4  p-2 border-white/20 border-b '>
+                <Icon name='barcode-outline' size={28} color='white' type='ionicons' />
                 <View className='flex-1'>
     
                     <Text className='text-white text-base font-semibold'>Add books via QR-Code</Text>
                     <Text className='text-white/40 text-sm '>Use your camera to scan a book's barcode and add it to your library instantly.</Text>
                 </View>
             </View>
+            </Link>
             <Link href='/manual'>
             <View className='flex-row items-center gap-4  py-4 p-2 border-white/20 border-b '>
-                <Icon name='create' size={28} color='white' />
+                <Icon name='create' size={28} color='white' type='material' />
                 <View className='flex-1'>
     
                     <Text className='text-white text-base font-semibold'>Manually add your book</Text>
