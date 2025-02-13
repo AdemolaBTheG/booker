@@ -6,6 +6,7 @@ import { booksService } from '@/services/booksService'
 import { Book } from '@/lib/types'
 import { FlashList } from '@shopify/flash-list'
 
+
 function skeletonBookItem(){
     return(
         <View className='flex-row flex-1 justify-between mt-5'>
@@ -24,55 +25,56 @@ function skeletonBookItem(){
     )
 }
 
-function bookItem({ item}: {item: Book}) {
-    return(
-             <Link key={item.id} href={`/(add)/${item.id}`}  className='flex-row flex-1 justify-between mt-5'>
-        <View className='flex-row w-full  justify-between items-center'>
-            <View className='flex-row gap-3 items-center'>
+ function BookItem({item}: {item: Book}) {
+  return (
+    <Link key={item.id} href={`/(add)/${item.id}`}  className='flex-row flex-1 justify-between mt-5'>
+    <View className='flex-row w-full  justify-between items-center'>
+        <View className='flex-row gap-3 items-center'>
 
 
-            <Image source={{uri: item.thumbnail}} className='w-20 h-32 rounded-xl ' resizeMode='cover' />
+        <Image source={{ uri: item?.thumbnail?.replace('http://', 'https://')}} className='w-20 h-32 rounded-xl ' resizeMode='cover' />
 
 
 
-                <View className='flex-col gap-1 max-w-[150px]'>
-                    <Text 
-                        numberOfLines={2}
-                        ellipsizeMode="tail" 
-                        className='text-white text-base font-semibold'
-                        style={{ lineHeight: 16 }}
-                    >
-                        {item.title}
-                    </Text>
-                    
-                    <Text 
-                        numberOfLines={2} 
-                        ellipsizeMode="tail" 
-                        className='text-white/40 text-sm'
-                       
-                    >
-                        {item.authors}
-                    </Text>
+            <View className='flex-col gap-1 max-w-[150px]'>
+                <Text 
+                    numberOfLines={2}
+                    ellipsizeMode="tail" 
+                    className='text-white text-base font-semibold'
+                    style={{ lineHeight: 16 }}
+                >
+                    {item.title}
+                </Text>
+                
+                <Text 
+                    numberOfLines={2} 
+                    ellipsizeMode="tail" 
+                    className='text-white/40 text-sm'
                    
+                >
+                    {item.authors}
+                </Text>
+               
 
 
-                </View>
             </View>
-           
-                 <TouchableOpacity 
-                className='inline-flex flex-row items-center gap-1 rounded-lg px-2 py-1'
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
-            >
-                <Icon name='add' size={24} color='white' type='material' />
-                <Text className='text-white text-sm font-semibold'>Add Book</Text>
-            </TouchableOpacity>
-           
-
         </View>
-    </Link>
        
-    )
+             <TouchableOpacity 
+            className='inline-flex flex-row items-center gap-1 rounded-lg px-2 py-1'
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+        >
+            <Icon name='add' size={24} color='white' type='material' />
+            <Text className='text-white text-sm font-semibold'>Add Book</Text>
+        </TouchableOpacity>
+       
+
+    </View>
+</Link>
+  )
 }
+
+
 
 function SearchBar({ onChangeText, value }: { onChangeText: (text: string) => void, value: string }) {
     return (
@@ -122,12 +124,16 @@ export default function Index() {
                     console.log('Searching for:', query);
                     const results = await booksService.searchBooks(query);
                    
-                    console.log(results[0].volumeId);
+                    console.log(results[0].thumbnail);
                     if (!Array.isArray(results)) {
                         console.error('Results is not an array:', results);
                         setBooks([]);
                         return;
                     }
+
+                    results.forEach(book => {
+                       Image.prefetch(book.thumbnail?.replace('http://', 'https://'));
+                    });
                     setBooks(results);
                 } catch (error) {
                     console.error('Search failed:', {
@@ -160,7 +166,7 @@ export default function Index() {
 
          {
             query.length != 0 ?
-            (<FlashList data={isLoading ? skeletonItems : books} renderItem={isLoading ? skeletonBookItem :  bookItem}  estimatedItemSize={112}/>)
+            ( <FlashList data={isLoading ? skeletonItems : books} renderItem={isLoading ? skeletonBookItem :  BookItem}  estimatedItemSize={120}/>)
 
 
            : (<><Link href='/barcode'>

@@ -2,7 +2,6 @@ import { Link, Redirect, useRouter } from 'expo-router'
 import React from 'react'
 import { View } from 'react-native'
 import {booksService} from '@/services/booksService'
-import { useCameraPermission } from 'react-native-vision-camera'
 export default function index() {
   
   return (

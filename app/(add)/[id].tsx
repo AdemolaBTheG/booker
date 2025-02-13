@@ -76,6 +76,7 @@ export default function BookDetails() {
     const [book,setBook] = useState<Book | null>(null);
     const fetchBookDetails = async () => {
         const results = await booksService.getBookDetails(id);
+        Image.prefetch(results.thumbnail?.replace('http://', 'https://'));
         setBook(results);
     };
 
@@ -91,7 +92,7 @@ export default function BookDetails() {
       <ScrollView className='flex-1  px-4'>
         <View className='flex-1 items-center'>
         <View className=' mt-16'>
-          <Image source={{uri: book?.thumbnail}} cachePolicy='memory' placeholder={PLACEHOLDER_BLURHASH} contentFit='cover' style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 16}} />
+          <Image source={{uri: book?.thumbnail?.replace('http://', 'https://')}} cachePolicy='disk' placeholder={PLACEHOLDER_BLURHASH} contentFit='cover' style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 16}} />
         </View>
 
         <View className="flex items-center gap-1 mt-6">

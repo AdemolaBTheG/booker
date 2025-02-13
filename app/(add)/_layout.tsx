@@ -47,6 +47,8 @@ export default function AddLayout() {
         <Stack.Screen name="barcode" options={{
             headerShown: true,
             headerTitle: 'Barcode',
+            headerShadowVisible: false,
+
         }} />
     </Stack>
   )

@@ -42,11 +42,12 @@
           "backgroundColor": "#ffffff"
         }
       ],
+    
       [
-        "react-native-vision-camera",
+        "expo-camera",
         {
-          "cameraPermissionText": "Allow $(PRODUCT_NAME) to access your camera",
-          "enableCodeScanner": true
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+        
         }
       ]
     ],
