@@ -10,7 +10,7 @@ export interface Book {
     isbn_13?: string,
     thumbnail?: string,
     medium?: string,
-    id?: string
+    id: string
 
 
 }

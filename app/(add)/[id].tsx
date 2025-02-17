@@ -2,9 +2,9 @@ import { Book } from '@/lib/types';
 import { booksService } from '@/services/booksService';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView, ImageBackground, TouchableOpacity, } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, } from 'react-native'
 import { Image } from 'expo-image';
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@/components/Icon';
 
 
 function Seperator(){
@@ -75,9 +75,17 @@ export default function BookDetails() {
     
     const [book,setBook] = useState<Book | null>(null);
     const fetchBookDetails = async () => {
-        const results = await booksService.getBookDetails(id);
-        Image.prefetch(results.thumbnail?.replace('http://', 'https://'));
+      try{
+
+            const results = await booksService.getBookDetails(id);
+        if(results.thumbnail){
+          await Image.prefetch(results.thumbnail?.replace('http://', 'https://'));
+        }
         setBook(results);
+      } catch (error) {
+        console.log(error);
+      }
+    
     };
 
 

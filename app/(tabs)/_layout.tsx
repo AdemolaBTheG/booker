@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon'
+import { Icon } from '@/components/Icon'
 import { Tabs, useRouter } from 'expo-router'
 import React from 'react'
 import { Pressable, View } from 'react-native'
@@ -13,25 +13,13 @@ export default function TabLayout() {
         <Tabs
         
           screenOptions={{
-            
             tabBarStyle: {
-              backgroundColor: 'transparent',
+              
+              backgroundColor: 'black',
               borderTopColor: 'rgba(255, 255, 255, 0.1)',
               position: 'absolute',
             },
-            tabBarBackground: () => (
-              <BlurView 
-                intensity={80} 
-                tint="dark"
-                style={{ 
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                }}
-              />
-            ),
+           
             
             headerStyle: {
               backgroundColor: '#000000',
@@ -50,6 +38,8 @@ export default function TabLayout() {
           <Tabs.Screen name="index" options={{
               headerShown: true,
               headerTitle: 'Home',
+              headerShadowVisible: true,
+              
               headerRight: () => (
                 <Pressable 
                   onPress={() => router.push('/(add)')}

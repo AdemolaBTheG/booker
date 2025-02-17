@@ -6,6 +6,8 @@ const {
 
 const config = getDefaultConfig(__dirname);
 
+config.resolver.sourceExts.push("sql");
+
 module.exports = wrapWithReanimatedMetroConfig(
     withNativeWind(config, { input: "./global.css" })
   );

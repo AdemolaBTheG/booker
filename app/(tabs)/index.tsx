@@ -1,5 +1,5 @@
 import { ScrollView, Text, TouchableOpacity, View, Pressable } from "react-native";
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@/components/Icon';
 import { FlashList } from "@shopify/flash-list";
 import { Link, router } from "expo-router";
 const items = [

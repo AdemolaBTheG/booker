@@ -1,13 +1,30 @@
 import { useFonts } from "expo-font";
 import { Link, Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import "../global.css";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Icon } from "@/components/ui/Icon";
-import { Pressable } from "react-native";
-
+import { Icon } from "@/components/Icon";
+import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
+import { ActivityIndicator } from "react-native";
+import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator'
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import migrations from '@/drizzle/migrations'
 export default function RootLayout() {
+
+  const expoDb = openDatabaseSync('books.db')
+  const db = drizzle(expoDb)
+  const {success,error} = useMigrations(db,migrations)
+
+  useEffect(() => {
+    if(success){
+      console.log('Migrations successful')
+    }
+    if(error){
+      console.error('Migrations failed',error)
+    }
+  },[success,error])
+
   SplashScreen.preventAutoHideAsync();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -24,7 +41,14 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000000' }}>
+   
+        <Suspense fallback={<ActivityIndicator size="large"/>}>
+          <SQLiteProvider
+           databaseName="books.db"
+            options={{enableChangeListener: true}} 
+            useSuspense>
+            
+            <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000000' }}>
       <Stack 
         screenOptions={{
           contentStyle: {
@@ -66,5 +90,8 @@ export default function RootLayout() {
        
       </Stack>
     </GestureHandlerRootView>
+    </SQLiteProvider>
+    </Suspense>
+   
   );
 }

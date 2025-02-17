@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@/components/Icon';
 import { Stack } from 'expo-router'
 import React, { memo, useCallback, useState } from 'react'
 import { TextInput, View } from 'react-native'
@@ -13,6 +13,7 @@ export default function AddLayout() {
             backgroundColor: '#000000',
           
         },
+    
         headerStyle:{
             backgroundColor: '#000000',
         },
@@ -22,7 +23,7 @@ export default function AddLayout() {
         
     }}
     >
-
+n 
         <Stack.Screen name="index" options={{
             headerShown: false,
             headerTitle: 'Add Book',
@@ -39,6 +40,8 @@ export default function AddLayout() {
         <Stack.Screen name="manual" options={{
             headerShown: true,
             headerTitle: 'Manually Add Book',
+            headerShadowVisible: false,
+
         }} />
         <Stack.Screen name="[id]" options={{
             headerShown: true,

@@ -1,10 +1,12 @@
-import { Icon } from '@/components/ui/Icon'
+import { Icon } from '@/components/Icon'
 import { Link } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Image } from 'react-native'
 import { booksService } from '@/services/booksService'
 import { Book } from '@/lib/types'
 import { FlashList } from '@shopify/flash-list'
+import BookItem from '@/components/BookItem'
+import { Image as ExpoImage } from 'expo-image'
 
 
 function skeletonBookItem(){
@@ -25,7 +27,7 @@ function skeletonBookItem(){
     )
 }
 
- function BookItem({item}: {item: Book}) {
+ /*function BookItem({item}: {item: Book}) {
   return (
     <Link key={item.id} href={`/(add)/${item.id}`}  className='flex-row flex-1 justify-between mt-5'>
     <View className='flex-row w-full  justify-between items-center'>
@@ -72,7 +74,7 @@ function skeletonBookItem(){
     </View>
 </Link>
   )
-}
+}*/
 
 
 
@@ -108,6 +110,7 @@ export default function Index() {
     const [books, setBooks] = useState<Book[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const skeletonItems = Array(10).fill(null);  // Show 6 skeleton items
+    const [prefetchedImages, setPrefetchedImages] = useState<Set<string>>(new Set());
 
 
     useEffect(() => {
@@ -116,30 +119,17 @@ export default function Index() {
             return;
         }
         if(query.length > 2){
-            
             setIsLoading(true);
 
             const timeoutId = setTimeout(async () => {
                 try {
-                    console.log('Searching for:', query);
                     const results = await booksService.searchBooks(query);
-                   
-                    console.log(results[0].thumbnail);
-                    if (!Array.isArray(results)) {
-                        console.error('Results is not an array:', results);
-                        setBooks([]);
-                        return;
-                    }
-
-                    results.forEach(book => {
-                       Image.prefetch(book.thumbnail?.replace('http://', 'https://'));
-                    });
+                    
+                    // Prefetch images that haven't been prefetched yet
+         
                     setBooks(results);
                 } catch (error) {
-                    console.error('Search failed:', {
-                        error,
-                        message: error instanceof Error ? error.message : 'Unknown error'
-                    });
+                    console.error('Search failed:', error);
                     setBooks([]);
                 } finally {
                     setIsLoading(false);
@@ -147,9 +137,7 @@ export default function Index() {
             }, 500);
     
             return () => clearTimeout(timeoutId);
-
         }
-       
     }, [query]);
 
 

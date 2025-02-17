@@ -1,9 +1,10 @@
+import { Book } from '@/lib/types';
 import supabase from '../lib/supabase';
 import 'react-native-url-polyfill/auto';
 
 class BooksService {
 
-    public async searchBooks(searchQuery: string){
+    public async searchBooks(searchQuery: string): Promise<Book[]>{
 
       
 
@@ -50,7 +51,36 @@ class BooksService {
 
     }
 
-    public async getBookDetails(volumeId: string){
+    public async getByISBN(isbn: string): Promise<Book>{
+
+        try{
+
+            if(!isbn){
+                throw new Error('ISBN is required');
+            }
+            
+            const {data,error} = await supabase.functions.invoke(`books/isbn/${isbn}`,{
+                method: 'GET',
+            })
+
+            if(error){
+                throw error;
+            }
+
+            return data;
+
+        }catch(error){
+            console.error('Error getting book by ISBN:', {
+                error,
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
+        
+    }
+
+    public async getBookDetails(volumeId: string): Promise<Book>{
 
         try{
             if(!volumeId){
@@ -80,6 +110,7 @@ class BooksService {
                 message: error instanceof Error ? error.message : 'Unknown error',
                 stack: error instanceof Error ? error.stack : undefined
             });
+            throw error;
         }
     }
 

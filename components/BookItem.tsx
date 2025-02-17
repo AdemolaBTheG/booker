@@ -1,23 +1,27 @@
 import { Link } from 'expo-router'
 import React from 'react'
-import { TouchableOpacity, View, Text } from 'react-native'
-import { Icon } from './ui/Icon'
-import { Image } from 'expo-image';
+import { TouchableOpacity, View, Text, Image } from 'react-native'
+import { Icon } from './Icon'
+
 import { Book } from '@/lib/types'
 
-
-
-
+const PLACEHOLDER_BLURHASH = 'L5P?:p~q-;M{%jxuNGRj.8t7t7Rj';
 
 export default function BookItem({item}: {item: Book}) {
     console.log(item.thumbnail)
   return (
-    <Link key={item.id} href={`/(add)/${item.id}`}  className='flex-row flex-1 justify-between mt-5'>
+    <View className='flex-row flex-1 justify-between mt-5'>
+        
+   
+    <Link key={item.id} href={`/(add)/${item.id}`}  >
     <View className='flex-row w-full  justify-between items-center'>
         <View className='flex-row gap-3 items-center'>
 
 
-        <Image source={{ uri: item?.thumbnail?.replace('http://', 'https://')}} className='w-20 h-32 rounded-xl ' contentFit='cover' cachePolicy='memory' />
+        <Image 
+            source={{ uri: item?.thumbnail?.replace('http://', 'https://') }} 
+            className='w-20 h-32 rounded-xl'
+        />
 
 
 
@@ -47,7 +51,7 @@ export default function BookItem({item}: {item: Book}) {
        
              <TouchableOpacity 
             className='inline-flex flex-row items-center gap-1 rounded-lg px-2 py-1'
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }} onPress={() => console.log('add book')}
         >
             <Icon name='add' size={24} color='white' type='material' />
             <Text className='text-white text-sm font-semibold'>Add Book</Text>
@@ -56,6 +60,7 @@ export default function BookItem({item}: {item: Book}) {
 
     </View>
 </Link>
+</View>
   )
 }
 
