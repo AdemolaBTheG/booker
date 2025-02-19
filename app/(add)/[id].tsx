@@ -108,7 +108,7 @@ export default function BookDetails() {
           <Text className='text-center text-white/80 text-base font-semibold'>{book?.authors}</Text>
         </View>
 
-        <TouchableOpacity className="inline-flex flex-row items-center justify-center gap-1 mt-6 p-3 w-full bg-cta rounded-xl"><Icon name='add' size={24} color='white' type='material' /><Text className='text-white text-base font-semibold'>Add To Library</Text></TouchableOpacity>
+        <TouchableOpacity className=" btn-primary gap-1 mt-6 p-3 w-full "><Icon name='add' size={24} color='white' type='material' /><Text className='text-white text-base font-semibold'>Add To Library</Text></TouchableOpacity>
 
 
         <View className='mt-10 flex-1 w-full px-4'>
