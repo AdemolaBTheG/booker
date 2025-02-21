@@ -10,11 +10,14 @@ import { ActivityIndicator } from "react-native";
 import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator'
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import migrations from '@/drizzle/migrations'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 export default function RootLayout() {
 
   const expoDb = openDatabaseSync('books.db')
   const db = drizzle(expoDb)
   const {success,error} = useMigrations(db,migrations)
+  
+  const queryClient = new QueryClient()
 
   useEffect(() => {
     if(success){
@@ -41,13 +44,14 @@ export default function RootLayout() {
   }
 
   return (
-   
+    
         <Suspense fallback={<ActivityIndicator size="large"/>}>
           <SQLiteProvider
            databaseName="books.db"
             options={{enableChangeListener: true}} 
             useSuspense>
-            
+                      <QueryClientProvider client={queryClient}>
+
             <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000000' }}>
       <Stack 
         screenOptions={{
@@ -80,16 +84,12 @@ export default function RootLayout() {
             
           }} 
         />
-        <Stack.Screen 
-          name="(permissions)" 
-          options={{ 
-            headerShown: false,
-            presentation: 'card',
-          }} 
-        />
+    
        
       </Stack>
     </GestureHandlerRootView>
+    </QueryClientProvider>
+
     </SQLiteProvider>
     </Suspense>
    

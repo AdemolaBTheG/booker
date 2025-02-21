@@ -1,6 +1,6 @@
 import { Book } from '@/lib/types';
 import { booksService } from '@/services/booksService';
-import { useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, } from 'react-native'
 import { Image } from 'expo-image';
@@ -108,7 +108,7 @@ export default function BookDetails() {
           <Text className='text-center text-white/80 text-base font-semibold'>{book?.authors}</Text>
         </View>
 
-        <TouchableOpacity className=" btn-primary gap-1 mt-6 p-3 w-full "><Icon name='add' size={24} color='white' type='material' /><Text className='text-white text-base font-semibold'>Add To Library</Text></TouchableOpacity>
+        <Link href={{pathname: `/[book]/edit`, params: {book: id}}} className="inline-flex btn-primary gap-1 mt-6 p-3 w-full "><Icon name='add' size={24} color='white' type='material' /><Text className='text-white text-base font-semibold'>Add To Library</Text></Link>
 
 
         <View className='mt-10 flex-1 w-full px-4'>

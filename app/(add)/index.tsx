@@ -7,6 +7,7 @@ import { Book } from '@/lib/types'
 import { FlashList } from '@shopify/flash-list'
 import BookItem from '@/components/BookItem'
 import { Image as ExpoImage } from 'expo-image'
+import { useQuery } from '@tanstack/react-query'
 
 
 function skeletonBookItem(){
@@ -126,8 +127,7 @@ export default function Index() {
                     const results = await booksService.searchBooks(query);
                     
                     // Prefetch images that haven't been prefetched yet
-         
-                    setBooks(results);
+                 setBooks(results);
                 } catch (error) {
                     console.error('Search failed:', error);
                     setBooks([]);
@@ -168,11 +168,10 @@ export default function Index() {
                 </View>
             </View>
             </Link>
-            <Link href='/manual'>
+            <Link href={`/${-1}/edit`}>
             <View className='flex-row items-center gap-4  py-4 p-2 border-white/20 border-b '>
                 <Icon name='create' size={28} color='white' type='material' />
                 <View className='flex-1'>
-    
                     <Text className='text-white text-base font-semibold'>Manually add your book</Text>
                     <Text className='text-white/40 text-sm '>Enter your book's details yourself—perfect for custom or rare titles.</Text>
                 </View>

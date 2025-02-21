@@ -1,7 +1,7 @@
 export interface Book {
 
     title: string,
-    authors: string[],
+    authors?: string[],
     publisher?: string,
     publishedDate?: string,
     description?: string,

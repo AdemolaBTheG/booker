@@ -37,12 +37,7 @@ n
          
 
         }} />
-        <Stack.Screen name="manual" options={{
-            headerShown: true,
-            headerTitle: 'Manually Add Book',
-            headerShadowVisible: false,
-
-        }} />
+ 
         <Stack.Screen name="[id]" options={{
             headerShown: true,
             headerTitle: 'Book Details',
@@ -53,6 +48,16 @@ n
             headerShadowVisible: false,
 
         }} />
+   
+        <Stack.Screen name="[book]/edit" options={{
+            headerShown: true,
+            headerTitle: 'Book Details',
+        }} />
+        <Stack.Screen name="[book]/details" options={{
+            headerShown: true,
+            headerTitle: 'Book Details',
+        }} />
+     
     </Stack>
   )
 

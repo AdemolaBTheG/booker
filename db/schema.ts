@@ -10,5 +10,8 @@ export const books = sqliteTable('books',{
     description: text('description'),
     published_date: text('published_date'),
     page_count: integer('page_count').notNull(),
-    
+    ownership_status: text('ownership_status').notNull(),
+    reading_status: text('reading_status').notNull(),
+    format: text('format').notNull(),
+    publisher: text('publisher'),
 })
