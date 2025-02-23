@@ -1,10 +1,11 @@
 import { Book } from '@/lib/types';
 import { booksService } from '@/services/booksService';
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import {  router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, } from 'react-native'
+import { View, Text, ScrollView,Pressable, } from 'react-native'
 import { Image } from 'expo-image';
 import { Icon } from '@/components/Icon';
+import { useQuery } from '@tanstack/react-query';
 
 
 function Seperator(){
@@ -62,10 +63,9 @@ function BookDetail({ book }: { book: Book }) {
     </View>
   )
 }
-export default function BookDetails() {
+export default function Details() {
 
 
-  const PLACEHOLDER_BLURHASH = 'L5P?:p~q-;M{%jxuNGRj.8t7t7Rj';
 
   const DESIRED_HEIGHT = 240;
   const aspectRatio = 42.67/61.33; 
@@ -74,33 +74,28 @@ export default function BookDetails() {
     const {id} = useLocalSearchParams<{id: string}>();
     
     const [book,setBook] = useState<Book | null>(null);
-    const fetchBookDetails = async () => {
-      try{
 
-            const results = await booksService.getBookDetails(id);
-        if(results.thumbnail){
-          await Image.prefetch(results.thumbnail?.replace('http://', 'https://'));
-        }
-        setBook(results);
-      } catch (error) {
-        console.log(error);
+    const {data} = useQuery<Book>({
+      queryKey: ['details', id],
+      queryFn: async () => {
+        if (id === "-1") throw new Error('Could not get details');
+        return await booksService.getBookDetails(id);
+       
       }
-    
-    };
-
-
-
+    })
     useEffect(() => {
     
-        fetchBookDetails();
-    }, [id]);
+        if(data){
+          setBook(data);
+        }
+    }, [data]);
 
   return (
 
       <ScrollView className='flex-1  px-4'>
         <View className='flex-1 items-center'>
         <View className=' mt-16'>
-          <Image source={{uri: book?.thumbnail?.replace('http://', 'https://')}} cachePolicy='disk' placeholder={PLACEHOLDER_BLURHASH} contentFit='cover' style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 16}} />
+          <Image source={{uri: book?.thumbnail?.replace('http://', 'https://')}} cachePolicy='disk'  contentFit='cover' style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 16}} />
         </View>
 
         <View className="flex items-center gap-1 mt-6">
@@ -108,7 +103,7 @@ export default function BookDetails() {
           <Text className='text-center text-white/80 text-base font-semibold'>{book?.authors}</Text>
         </View>
 
-        <Link href={{pathname: `/[book]/edit`, params: {book: id}}} className="inline-flex btn-primary gap-1 mt-6 p-3 w-full "><Icon name='add' size={24} color='white' type='material' /><Text className='text-white text-base font-semibold'>Add To Library</Text></Link>
+        <Pressable onPress={() => router.push(`/${id}/edit`)} className=" btn-primary gap-1 mt-6 p-3 w-full "><Icon name='add' size={24} color='white' type='material' /><Text className='text-white text-lg text-center font-semibold'>Add To Library</Text></Pressable>
 
 
         <View className='mt-10 flex-1 w-full px-4'>

@@ -13,7 +13,7 @@ export default function BookItem({item}: {item: Book}) {
     <View className='flex-row flex-1 justify-between mt-5'>
         
    
-    <Link key={item.id} href={{pathname: `/(add)/[id]`, params: {id: item.id}}}  >
+    <Link key={item.id} href={{pathname: `/(add)/[id]/details`, params: {id: item.id}}}  >
     <View className='flex-row w-full  justify-between items-center'>
         <View className='flex-row gap-3 items-center'>
 

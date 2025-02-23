@@ -8,13 +8,16 @@ import { Icon } from "@/components/Icon";
 import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
 import { ActivityIndicator } from "react-native";
 import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator'
-import { drizzle } from "drizzle-orm/expo-sqlite";
 import migrations from '@/drizzle/migrations'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { db } from '@/lib/db';
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+
 export default function RootLayout() {
 
-  const expoDb = openDatabaseSync('books.db')
-  const db = drizzle(expoDb)
+
+  
+  useDrizzleStudio(db)
   const {success,error} = useMigrations(db,migrations)
   
   const queryClient = new QueryClient()

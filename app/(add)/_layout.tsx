@@ -26,22 +26,15 @@ export default function AddLayout() {
 n 
         <Stack.Screen name="index" options={{
             headerShown: false,
-            headerTitle: 'Add Book',
             
 
         
-            headerSearchBarOptions: {
-                placeholder: 'Search',
-                textColor: 'white',
-            }
+         
          
 
         }} />
  
-        <Stack.Screen name="[id]" options={{
-            headerShown: true,
-            headerTitle: 'Book Details',
-        }} />
+     
         <Stack.Screen name="barcode" options={{
             headerShown: true,
             headerTitle: 'Barcode',
@@ -49,11 +42,11 @@ n
 
         }} />
    
-        <Stack.Screen name="[book]/edit" options={{
+        <Stack.Screen name="[id]/edit" options={{
             headerShown: true,
             headerTitle: 'Book Details',
         }} />
-        <Stack.Screen name="[book]/details" options={{
+        <Stack.Screen name="[id]/details" options={{
             headerShown: true,
             headerTitle: 'Book Details',
         }} />

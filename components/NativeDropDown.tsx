@@ -31,7 +31,7 @@ export default function NativeDropDown({ items, onSelect }: NativeDropDownProps)
       
       <DropdownMenu.Group>
         {items.map((item) => (
-          <DropdownMenu.Item  key={item.key} onSelect={() => {onSelect(item.key), setSelectedItem(item)}}>
+          <DropdownMenu.Item  key={item.key} onSelect={() => {onSelect(item.title), setSelectedItem(item)}}>
             <DropdownMenu.ItemTitle>{item.title}</DropdownMenu.ItemTitle>
             <DropdownMenu.ItemIcon 
             ios={
