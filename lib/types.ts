@@ -18,6 +18,23 @@ export interface Book {
 
 }
 
+export interface BookDB {
+    id: number,
+    title: string,
+    authors?: string[],
+    publisher?: string,
+    publishedDate?: string,
+    description?: string,
+    pages?: number,
+    isbn_10?: string,
+    isbn_13?: string,
+    thumbnail?: string,
+    readingStatus: string,
+    ownershipStatus: string,
+    format?: string,
+    volumId?: string,
+}
+
 export const bookSchema = z.object({
     title: z.string({message:"Title is required"}).min(1),
     authors: z.array(z.string()).optional(),

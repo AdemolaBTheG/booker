@@ -102,7 +102,6 @@ function Seperator(){
 
 export default function Edit() {
   const {id} = useLocalSearchParams<{id: string}>();
-  const [image, setImage] = useState<string | null>(null);
   const [editBook, setEditBook] = useState<Book | null>(null);
  const {data} = useQuery<Book>({
   queryKey: ['book', id],
@@ -128,10 +127,12 @@ const pickImageAsync = async () => {
     quality: 1,
   });
   console.log(result);
-  if (!result.canceled) {
-    setImage(result.assets[0].uri);
-    form.setValue('thumbnail', result.assets[0].uri);
-  }
+  
+    if (!result.canceled) {
+
+      form.setValue('thumbnail', result.assets[0].uri,{shouldDirty: true, shouldTouch: true,shouldValidate: true});
+    }
+  
 }
   const  form = useForm<BookForm>({
     resolver: zodResolver(bookSchema),
@@ -151,6 +152,7 @@ const pickImageAsync = async () => {
       form.setValue('description', data.description || '');
       form.setValue('isbn_10', data.isbn_10 || '');
       form.setValue('isbn_13', data.isbn_13 || '');
+      form.setValue('thumbnail', data.thumbnail || '');
      
     
     }
@@ -182,7 +184,7 @@ const pickImageAsync = async () => {
        <View className='flex  items-center justify-center'>
        <Pressable onPress={pickImageAsync}>
           {
-            image ? (<Image source={{uri: image}} className='w-28 h-40 rounded-xl border-white border-2' resizeMode='cover' />) : (   <View className="flex items-center justify-center border w-28 mx-auto h-40 border-white/10 bg-white/15 rounded-xl">
+            form.getValues('thumbnail') ? (<Image source={{uri: form.getValues('thumbnail')}} className='w-28 h-40 rounded-xl border-white border-2' resizeMode='cover' />) : (   <View className="flex items-center justify-center border w-28 mx-auto h-40 border-white/10 bg-white/15 rounded-xl">
               <Icon name='add' size={28} className='' color='white' type='material' />
             </View>) 
           }
@@ -243,7 +245,7 @@ const pickImageAsync = async () => {
           <View className="form-container ">
               <Text className= {`form-label ${form.formState.errors.format ? 'text-red-500' : 'text-white/40'}`}>Format</Text>
             
-         <NativeDropDown items={bookFormats} onSelect={(title) => form.setValue('format',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} />
+         <NativeDropDown items={bookFormats} onSelect={(title) => form.setValue('format',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} isEdit={true} />
          <Controller control={form.control} name='format' render={({field: {onChange,value,onBlur}}) => (
          <TextInput className="hidden" 
          value={value} 
@@ -322,14 +324,14 @@ const pickImageAsync = async () => {
         <Text className='text-white text-sm font-medium px-2'>Reading Acivity</Text>
         <View className="form-select-container">
          <Text className= {`form-label ${form.formState.errors.readingStatus ? 'text-red-500' : 'text-white/40'}`}>Reading Status</Text>
-          <NativeDropDown items={readingStatus} onSelect={(title) => form.setValue('readingStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} />
+          <NativeDropDown items={readingStatus} onSelect={(title) => form.setValue('readingStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} isEdit={true} />
         </View>
         </View>
         <View className="flex flex-col mt-7 gap-2 mb-40">
         <Text className='text-white text-sm font-medium px-2'>Collection & Ownership</Text>
         <View className="form-select-container">
          <Text className= {`form-label ${form.formState.errors.ownershipStatus ? 'text-red-500' : 'text-white/40'}`}>Ownership Status</Text>
-         <NativeDropDown items={ ownershipStatus} onSelect={(title) => form.setValue('ownershipStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} />
+         <NativeDropDown items={ ownershipStatus} onSelect={(title) => form.setValue('ownershipStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} isEdit={true} />
         </View>
         </View>
        

@@ -6,6 +6,7 @@ import { books } from '@/db/schema';
 import { db } from '@/lib/db';
 import { useSQLiteContext } from 'expo-sqlite';
 import { count } from 'drizzle-orm';
+import { DbBook } from '@/db/schema';
 class BooksService {
 
     private db: ExpoSQLiteDatabase;
@@ -59,6 +60,16 @@ class BooksService {
             throw error;
         }
 
+    }
+
+    public async getBooks(): Promise<DbBook[]> {
+        try {    
+            return await this.db.select().from(books);
+           
+        } catch(error) {
+            console.error('Error getting books:', error);
+            return [];
+        }
     }
 
     public async getByISBN(isbn: string): Promise<Book>{

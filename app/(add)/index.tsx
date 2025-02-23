@@ -8,7 +8,7 @@ import { FlashList } from '@shopify/flash-list'
 import BookItem from '@/components/BookItem'
 import { Image as ExpoImage } from 'expo-image'
 import { useQuery } from '@tanstack/react-query'
-
+import SearchBar from '@/components/SearchBar'
 
 function skeletonBookItem(){
     return(
@@ -79,31 +79,7 @@ function skeletonBookItem(){
 
 
 
-function SearchBar({ onChangeText, value }: { onChangeText: (text: string) => void, value: string }) {
-    return (
-        <View className='flex items-center justify-center py-5 px-4 border-b border-white/20'>
-            <View className='flex-row gap-1 items-center bg-white/10 rounded-2xl px-2 py-2'>
-                <Icon 
-                    name='search' 
-                    size={28} 
-                    color="rgba(255, 255, 255, 0.4)"
-                    type='material'
 
-                />
-                <TextInput 
-                    className='flex-1 text-white' 
-                    placeholder='Search' 
-                    value={value}
-                    onChangeText={onChangeText}
-                    placeholderTextColor='rgba(255, 255, 255, 0.4)'
-                    textAlignVertical="center"
-                    textAlign='left'
-                    style={{fontSize: 18}}
-                />
-            </View>
-        </View>
-    )
-}
 
 export default function Index() {
 
@@ -144,8 +120,7 @@ export default function Index() {
 
   return (
     <View className='flex-1  '>
-
-      <SearchBar onChangeText={setQuery} value={query} />
+        <SearchBar onChangeText={setQuery} value={query} placeholder='Search' showBorder={true} />
      <ScrollView className='flex-1 px-4' contentInsetAdjustmentBehavior='automatic'>
        
       

@@ -10,14 +10,17 @@ import { ActivityIndicator } from "react-native";
 import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator'
 import migrations from '@/drizzle/migrations'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { db } from '@/lib/db';
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+
+
 
 export default function RootLayout() {
 
-
-  
+  const expoDb = openDatabaseSync("books.db", {enableChangeListener: true, useNewConnection: true});
+  const db = drizzle(expoDb);
   useDrizzleStudio(db)
+  
   const {success,error} = useMigrations(db,migrations)
   
   const queryClient = new QueryClient()
@@ -60,8 +63,15 @@ export default function RootLayout() {
         screenOptions={{
           contentStyle: {
             backgroundColor: '#000000'
+            
           
           },
+        headerStyle: {
+          backgroundColor: '#000000'
+        },
+        headerTitleStyle: {
+          color: '#fff'
+        },
         
         }} 
       >
@@ -85,6 +95,14 @@ export default function RootLayout() {
             presentation: 'modal',
         
             
+          }} 
+        />
+        <Stack.Screen 
+          name="(books)/[filter]" 
+          options={{ 
+            headerShown: true,
+            headerShadowVisible: true,
+            headerTitle: '',
           }} 
         />
     

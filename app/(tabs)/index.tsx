@@ -66,14 +66,14 @@ export default  function Index() {
         <Text className="text-white text-xl font-semibold">Bookshelf</Text>
         <View className="flex-col mt-4 gap-3">
           {items.map((item) => (
-            <Link href='/index' key={item.title} asChild>
+            <Link href={{pathname: `/(books)/${item.title}`}}  key={item.title} asChild>
               <Pressable className="flex-row items-center justify-between border border-white/20  bg-white/15 px-2 py-3 rounded-lg active:opacity-70"> 
                 <View className="flex-row items-center gap-3">
                   <Icon name={item.icon as any} size={24} color="white" type="material" />
                   <Text className="text-white text-base font-semibold">{item.title}</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
-                  <Text className="text-white/20 text-base font-semibold">{data?.[0]?.count}</Text>
+                  <Text className="text-white/20 text-base font-semibold">{ data?.[0]?.count}</Text>
                 <Icon 
                   name="chevron-right" 
                   size={24} 

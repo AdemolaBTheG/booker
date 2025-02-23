@@ -10,18 +10,28 @@ export type NativeDropDownProps = {
     icon:string,
     iconAndroid?:string,
   }>
-  onSelect: (value: string) => void
+  onSelect: (value: string) => void,
+  isEdit: boolean
 }
 
-export default function NativeDropDown({ items, onSelect }: NativeDropDownProps) {
+export default function NativeDropDown({ items, onSelect, isEdit }: NativeDropDownProps) {
 
   const [selectedItem, setSelectedItem] = useState<NativeDropDownProps['items'][number] | null>(null)
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <View className=' flex-row items-center gap-2 '>
-          <Text className='text-white text-base font-medium'>{selectedItem?.title || 'Not selected'}</Text>
+        
+        
+          {isEdit ? (
+            <>
+              <Text className='text-white text-base font-medium'>{selectedItem?.title || 'Not selected'}</Text>
           <Icon name="chevron-expand" size={24} color="white" type="ionicons" />
+            </>
+          ) : (
+            <Icon name="swap-vert" size={24} color="white" type="material" />
+          )}
+            
 
         </View>
       </DropdownMenu.Trigger>

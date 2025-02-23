@@ -9,7 +9,6 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#000000' }}>
-      <BlurView intensity={80} style={{ flex: 1 }}>
         <Tabs
         
           screenOptions={{
@@ -61,15 +60,14 @@ export default function TabLayout() {
                   <Icon name="auto-graph" color={color} size={24} type="material" />
               ),
           }} />
-        <Tabs.Screen name="(add)" options={{
-            href: null,
-        }} />
+    
+      
         
 
 
 
         </Tabs>
-      </BlurView>
+      
 
     </View>
 

@@ -18,6 +18,4 @@ export const books = sqliteTable('books',{
 })
 
 
-export const schema = {
-    books
-}
+export type DbBook = typeof books.$inferSelect;
