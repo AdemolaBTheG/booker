@@ -1,7 +1,7 @@
 import { Book, NewBook } from '@/lib/types';
 import supabase from '../lib/supabase';
 import 'react-native-url-polyfill/auto';
-import { drizzle, ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
+import { drizzle, ExpoSQLiteDatabase, useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { books } from '@/db/schema';
 import { db } from '@/lib/db';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -166,19 +166,6 @@ class BooksService {
         }
     }
 
-    public async getCount(){
-
-        try{
-             await db.select({ count: count() }).from(books);
-        }
-        catch(error){
-            console.error('Error getting count:', {
-                error,
-                message: error instanceof Error ? error.message : 'Unknown error',
-                stack: error instanceof Error ? error.stack : undefined
-            });
-        }
-    }
 }
 
 export const booksService = new BooksService();

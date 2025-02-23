@@ -8,4 +8,15 @@
     .btn-primary{
         @apply inline-flex flex-row items-center justify-center bg-cta rounded-2xl
     }
+
+    .form-label{
+        @apply text-white/40 font-semibold
+    }
+    .form-select-container{
+        @apply flex flex-row items-center justify-between p-3  border bg-white/15  border-white/10 rounded-xl
+    }
+
+    .form-container{
+        @apply flex flex-row p-3 justify-between w-full border-b border-white/10  items-center 
+    }
 }

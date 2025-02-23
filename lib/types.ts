@@ -19,9 +19,9 @@ export interface Book {
 }
 
 export const bookSchema = z.object({
-    title: z.string({message:"Title is required"}),
+    title: z.string({message:"Title is required"}).min(1),
     authors: z.array(z.string()).optional(),
-    pages: z.string({message:"Pages is required"}),
+    pages: z.string({message:"Pages is required"}).min(1),
     publisher: z.string().optional(),
     publishedDate: z.string().optional(),
     description: z.string().optional(),

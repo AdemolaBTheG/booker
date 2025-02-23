@@ -2,6 +2,11 @@ import { ScrollView, Text, TouchableOpacity, View, Pressable } from "react-nativ
 import { Icon } from '@/components/Icon';
 import { FlashList } from "@shopify/flash-list";
 import { Link, router } from "expo-router";
+import { booksService } from "@/services/booksService";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { db } from "@/lib/db";
+import { books } from "@/db/schema";
+import { count } from "drizzle-orm";
 const items = [
 
   {
@@ -43,6 +48,9 @@ const items = [
 
 export default  function Index() {
 
+  const {data} = useLiveQuery(db.select({ count: count() }).from(books));
+  console.log(data);
+
   return (
     <ScrollView className="flex-1 bg-black">
        <View className="flex-1  px-4">
@@ -64,12 +72,16 @@ export default  function Index() {
                   <Icon name={item.icon as any} size={24} color="white" type="material" />
                   <Text className="text-white text-base font-semibold">{item.title}</Text>
                 </View>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-white/20 text-base font-semibold">{data?.[0]?.count}</Text>
                 <Icon 
                   name="chevron-right" 
                   size={24} 
                   color="rgba(255, 255, 255, 0.2)"
                   type="material"
                 />
+                </View>
+               
               </Pressable>
             </Link>
           ))}

@@ -130,6 +130,7 @@ const pickImageAsync = async () => {
   console.log(result);
   if (!result.canceled) {
     setImage(result.assets[0].uri);
+    form.setValue('thumbnail', result.assets[0].uri);
   }
 }
   const  form = useForm<BookForm>({
@@ -194,8 +195,8 @@ const pickImageAsync = async () => {
         <View className='mt-5 gap-2'>
         <Text className='text-white text-sm font-medium px-2 '>Book Details</Text>
         <View className="flex flex-col   items-center  justify-center bg-white/15 rounded-xl border-white/10 border">
-          <View className="flex flex-row p-3 justify-between w-full border-b   items-center  border-white/10">
-          <Text className='text-white/40 font-semibold'>Title</Text>
+          <View className="form-container ">
+          <Text className={`form-label ${form.formState.errors.title ? 'text-red-500' : 'text-white/40'}`}>Title</Text>
           <Controller 
             control={form.control}
             name='title'
@@ -213,8 +214,8 @@ const pickImageAsync = async () => {
             )}/>
           </View>
 
-          <View className="flex flex-row p-3 justify-between w-full border-b border-white/10  items-center  ">
-              <Text className='  text-white/40 font-semibold'>Author</Text>
+          <View className="form-container ">
+              <Text className='form-label'>Author</Text>
             <Controller control={form.control} name='authors' render={({field: {onChange,value,onBlur}}) => (
             <TextInput className="w-5/6 text-white"
              textAlign='right'
@@ -226,8 +227,8 @@ const pickImageAsync = async () => {
             )}/>
           
           </View>
-          <View className="flex flex-row p-3 justify-between w-full border-b border-white/10  items-center  ">
-              <Text className='text-white/40 font-semibold'>Pages</Text>
+          <View className="form-container ">
+              <Text className= {`form-label ${form.formState.errors.pages ? 'text-red-500' : 'text-white/40'}`}>Pages</Text>
             <Controller control={form.control} name='pages' render={({field: {onChange,value,onBlur}}) => (
             <TextInput className="w-5/6 text-white"
              textAlign='right'
@@ -239,22 +240,22 @@ const pickImageAsync = async () => {
             
           
           </View>
-          <View className="flex flex-row p-3 justify-between w-full border-b border-white/10  items-center  ">
-              <Text className='text-white/40 font-semibold'>Format</Text>
+          <View className="form-container ">
+              <Text className= {`form-label ${form.formState.errors.format ? 'text-red-500' : 'text-white/40'}`}>Format</Text>
             
-         <NativeDropDown items={bookFormats} onSelect={(title) => form.setValue('format',title,)} />
+         <NativeDropDown items={bookFormats} onSelect={(title) => form.setValue('format',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} />
          <Controller control={form.control} name='format' render={({field: {onChange,value,onBlur}}) => (
          <TextInput className="hidden" 
          value={value} 
          onChangeText={onChange}
          onBlur={onBlur}
          />
-         )}/>
+         )}/>  
        
           
           </View>
-          <View className="flex flex-row p-3 justify-between w-full border-b border-white/10  items-center  ">
-              <Text className='text-white/40 font-semibold pr-2'>Publisher</Text>
+          <View className="form-container ">
+              <Text className='form-label '>Publisher</Text>
             
             <TextInput className="flex-1 text-white"
              textAlign='right'
@@ -262,8 +263,8 @@ const pickImageAsync = async () => {
             
           
           </View>
-          <View className="flex flex-row p-3 justify-between w-full border-b border-white/10  items-center  ">
-              <Text className='text-white/40 font-semibold'>Year</Text>
+          <View className="form-container ">
+              <Text className='form-label'>Year</Text>
             
             <Controller control={form.control} name='publishedDate' render={({field: {onChange,value,onBlur}}) => (
             <TextInput className="w-5/6 text-white"
@@ -276,8 +277,8 @@ const pickImageAsync = async () => {
             
           
           </View>
-          <View className="flex flex-row p-3 justify-between w-full border-b border-white/10  items-center  ">
-              <Text className='text-white/40 font-semibold'>ISBN 10</Text>
+          <View className="form-container ">
+              <Text className='form-label'>ISBN 10</Text>
             
             <Controller control={form.control} name='isbn_10' render={({field: {onChange,value,onBlur}}) => (
             <TextInput className="w-5/6 text-white"
@@ -291,7 +292,7 @@ const pickImageAsync = async () => {
           
           </View>
           <View className="flex flex-row p-3 justify-between w-full    items-center  ">
-              <Text className='text-white/40 font-semibold'>ISBN 13</Text>
+              <Text className='form-label'>ISBN 13</Text>
             
             <Controller control={form.control} name='isbn_13' render={({field: {onChange,value,onBlur}}) => (
             <TextInput className="w-5/6 text-white"
@@ -319,29 +320,30 @@ const pickImageAsync = async () => {
         </View>
         <View className="flex flex-col mt-7 gap-2">
         <Text className='text-white text-sm font-medium px-2'>Reading Acivity</Text>
-        <View className="flex flex-row items-center justify-between p-3  border bg-white/15 border-white/10 rounded-xl">
-         <Text className="text-white/40 font-semibold">Reading Status</Text>
-          <NativeDropDown items={readingStatus} onSelect={(title) => form.setValue('readingStatus',title)} />
+        <View className="form-select-container">
+         <Text className= {`form-label ${form.formState.errors.readingStatus ? 'text-red-500' : 'text-white/40'}`}>Reading Status</Text>
+          <NativeDropDown items={readingStatus} onSelect={(title) => form.setValue('readingStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} />
         </View>
         </View>
         <View className="flex flex-col mt-7 gap-2 mb-40">
         <Text className='text-white text-sm font-medium px-2'>Collection & Ownership</Text>
-        <View className="flex flex-row items-center justify-between p-3  border bg-white/15 border-white/10 rounded-xl">
-         <Text className="text-white/40 font-semibold">Ownership Status</Text>
-         <NativeDropDown items={ ownershipStatus} onSelect={(title) => form.setValue('ownershipStatus',title)} />
+        <View className="form-select-container">
+         <Text className= {`form-label ${form.formState.errors.ownershipStatus ? 'text-red-500' : 'text-white/40'}`}>Ownership Status</Text>
+         <NativeDropDown items={ ownershipStatus} onSelect={(title) => form.setValue('ownershipStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} />
         </View>
         </View>
        
       </ScrollView>
       <View  className="absolute bottom-0 flex  left-0 right-0 bg-black   border-t border-white/10">
       <View className='flex-row items-center justify-center p-4'>
-      <TouchableOpacity 
+      <Pressable 
         onPress={form.handleSubmit(onSubmit)} 
+        disabled={form.formState.isSubmitting}
         className='btn-primary gap-1 mb-12 p-4 w-full'
       >
         <Icon name='add' size={28} color='white' type='material' />
         <Text className='text-white text-lg font-semibold'>Add To Library</Text>
-      </TouchableOpacity>
+      </Pressable>
       </View>
          
         </View>
