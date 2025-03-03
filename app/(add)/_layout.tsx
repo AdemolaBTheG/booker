@@ -41,15 +41,16 @@ n
             headerShadowVisible: false,
 
         }} />
-   
+        
         <Stack.Screen name="[id]/edit" options={{
             headerShown: true,
-            headerTitle: 'Book Details',
+            headerTitle: 'Book Edit',
         }} />
         <Stack.Screen name="[id]/details" options={{
             headerShown: true,
             headerTitle: 'Book Details',
         }} />
+   
      
     </Stack>
   )

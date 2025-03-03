@@ -2,7 +2,7 @@ import { Book } from '@/lib/types';
 import { booksService } from '@/services/booksService';
 import {  router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView,Pressable, } from 'react-native'
+import { View, Text, ScrollView,Pressable, ImageBackground } from 'react-native'
 import { Image } from 'expo-image';
 import { Icon } from '@/components/Icon';
 import { useQuery } from '@tanstack/react-query';
@@ -91,7 +91,7 @@ export default function Details() {
     }, [data]);
 
   return (
-
+      
       <ScrollView className='flex-1  px-4'>
         <View className='flex-1 items-center'>
         <View className=' mt-16'>

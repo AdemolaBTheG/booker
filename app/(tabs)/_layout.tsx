@@ -1,7 +1,7 @@
 import { Icon } from '@/components/Icon'
 import { Tabs, useRouter } from 'expo-router'
 import React from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, View, Text } from 'react-native'
 import { BlurView } from 'expo-blur';
 
 export default function TabLayout() {
@@ -9,6 +9,8 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#000000' }}>
+ 
+      
         <Tabs
         
           screenOptions={{

@@ -7,6 +7,7 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/lib/db";
 import { books } from "@/db/schema";
 import { count } from "drizzle-orm";
+import TimerComponent from "@/components/TimerComponent";
 const items = [
 
   {
@@ -52,7 +53,9 @@ export default  function Index() {
   console.log(data);
 
   return (
-    <ScrollView className="flex-1 bg-black">
+    <View className="flex-1 bg-black">
+     
+       <ScrollView className="flex-1 bg-black">
        <View className="flex-1  px-4">
       <Text className="text-white text-4xl font-semibold mt-5">Booker</Text>
       <View className="rounded-lg bg-white/15 px-2 py-3 mt-10 gap-3 border border-white/20 flex items-center justify-center">
@@ -88,7 +91,13 @@ export default  function Index() {
         </View>
       </View>
     </View>
+   
     </ScrollView>
+    <View className="absolute bottom-24 left-0 right-0">
+        <TimerComponent />
+      </View>
+    </View>
+   
 
   );
    

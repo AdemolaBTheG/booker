@@ -13,6 +13,32 @@ class BooksService {
     constructor(){
         this.db = db;
     }
+
+    public async getBookById(id: string): Promise<DbBook>{
+        try{
+            if(!id){
+                throw new Error('ID is required');
+            }
+            const idNumber = Number(id);
+            const book = (await this.db.select().from(books)).find(book => book.id === idNumber);
+
+            if(!book){
+                throw new Error('Book not found');
+            }
+
+            return book;
+            
+            
+        }
+        catch(error){
+            console.error('Error getting book by ID:', {
+                error,
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
+    }
   
     
     public async searchBooks(searchQuery: string): Promise<Book[]>{

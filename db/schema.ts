@@ -17,5 +17,13 @@ export const books = sqliteTable('books',{
     volumId: text('volumId'),
 })
 
+export const readingSessions = sqliteTable('reading_sessions', {
+  id: integer('id').primaryKey(),
+  bookId: integer('book_id').notNull(),
+  startTime: integer('start_time').notNull(),
+  endTime: integer('end_time'),
+  duration: integer('duration').notNull(),
+  createdAt: integer('created_at').notNull()
+});
 
 export type DbBook = typeof books.$inferSelect;

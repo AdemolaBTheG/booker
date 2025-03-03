@@ -12,7 +12,8 @@ import migrations from '@/drizzle/migrations'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { drizzle } from "drizzle-orm/expo-sqlite";
-
+import {PostHogProvider} from 'posthog-react-native'
+import { Text } from "react-native";
 
 
 export default function RootLayout() {
@@ -50,69 +51,93 @@ export default function RootLayout() {
   }
 
   return (
-    
-        <Suspense fallback={<ActivityIndicator size="large"/>}>
-          <SQLiteProvider
-           databaseName="books.db"
-            options={{enableChangeListener: true}} 
-            useSuspense>
-                      <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<ActivityIndicator size="large"/>}>
+        <SQLiteProvider
+         databaseName="books.db"
+          options={{enableChangeListener: true}} 
+          useSuspense>
+            <PostHogProvider apiKey="phc_HjOdGfA46Ifh2JChDXT9iU2DWK1ITwuiPvdDQlrEGfi" options={{
+                          host: "https://eu.i.posthog.com",
 
-            <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000000' }}>
-      <Stack 
-        screenOptions={{
-          contentStyle: {
-            backgroundColor: '#000000'
-            
-          
-          },
-        headerStyle: {
+            }}>
+
+                    <QueryClientProvider client={queryClient}>
+
+          <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000000' }}>
+    <Stack 
+      screenOptions={{
+        contentStyle: {
           backgroundColor: '#000000'
-        },
-        headerTitleStyle: {
-          color: '#fff'
-        },
+          
         
+        },
+      headerStyle: {
+        backgroundColor: '#000000'
+      },
+      headerTitleStyle: {
+        color: '#fff'
+      },
+      
+      }} 
+    >
+      <Stack.Screen 
+        name="(tabs)" 
+        options={{ 
+          headerShown: false,
+          headerShadowVisible: true,
         }} 
-      >
-        <Stack.Screen 
-          name="(tabs)" 
-          options={{ 
-            headerShown: false,
-            headerShadowVisible: true,
-          }} 
-        />
-        <Stack.Screen 
-          name="index" 
-          options={{ 
-            headerShown: false,
-          }} 
-        />
-        <Stack.Screen 
-          name="(add)" 
-          options={{ 
-            headerShown: false,
-            presentation: 'modal',
+      />
+      <Stack.Screen 
+        name="index" 
+        options={{ 
+          headerShown: false,
+        }} 
+      />
+      <Stack.Screen 
+        name="(add)" 
+        options={{ 
+          headerShown: false,
+          presentation: 'modal',
+      
+          
+        }} 
+      />
+      <Stack.Screen 
+        name="(books)/[filter]" 
+        options={{ 
+          headerShown: true,
+          headerShadowVisible: true,
+          headerTitle: '',
+        }} 
         
-            
-          }} 
-        />
-        <Stack.Screen 
-          name="(books)/[filter]" 
-          options={{ 
-            headerShown: true,
-            headerShadowVisible: true,
-            headerTitle: '',
-          }} 
-        />
+      />
+      <Stack.Screen 
+        name="(books)/session" 
+        options={{ 
+          headerShown: true,
+          headerTitle: 'Reading Session',
+        }} 
+      />
     
-       
-      </Stack>
-    </GestureHandlerRootView>
-    </QueryClientProvider>
 
-    </SQLiteProvider>
-    </Suspense>
+      <Stack.Screen name="(books)/[bookId]/item" options={{
+          headerShown: true,
+          headerTitle: 'Book Details',
+      }} />
+
+      <Stack.Screen name="(books)/[bookId]/timer" options={{
+          headerShown: true,
+          headerTitle: 'Timer',
+      }} />
+
+     
+    </Stack>
+  </GestureHandlerRootView>
+  </QueryClientProvider>
+  </PostHogProvider>
+
+  </SQLiteProvider>
+  </Suspense>
    
   );
 }
