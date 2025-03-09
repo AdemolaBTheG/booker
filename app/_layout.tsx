@@ -1,12 +1,12 @@
 import { useFonts } from "expo-font";
 import { Link, Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import "../global.css";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Icon } from "@/components/Icon";
 import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, AppState } from "react-native";
 import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator'
 import migrations from '@/drizzle/migrations'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,7 +14,7 @@ import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import {PostHogProvider} from 'posthog-react-native'
 import { Text } from "react-native";
-
+import { useTimerStore } from '@/stores/useTimerStore';
 
 export default function RootLayout() {
 
@@ -25,6 +25,12 @@ export default function RootLayout() {
   const {success,error} = useMigrations(db,migrations)
   
   const queryClient = new QueryClient()
+
+  // AppState tracking for timer
+  
+
+  // Global AppState listener for timer updates from any screen
+
 
   useEffect(() => {
     if(success){
@@ -98,7 +104,8 @@ export default function RootLayout() {
         options={{ 
           headerShown: false,
           presentation: 'modal',
-      
+        
+
           
         }} 
       />
@@ -112,7 +119,7 @@ export default function RootLayout() {
         
       />
       <Stack.Screen 
-        name="(books)/session" 
+        name="(books)/[bookId]/session" 
         options={{ 
           headerShown: true,
           headerTitle: 'Reading Session',

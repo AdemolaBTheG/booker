@@ -9,8 +9,9 @@ type SliderComponentProps = {
     max: number;
     width: number;
     height: number;
+    step: number;
 }
-export default function SliderComponent({value, onValueChange, min, max, width, height}: SliderComponentProps) {
+export default function SliderComponent({value, onValueChange, min, max, width, height, step}: SliderComponentProps) {
   return (
     <Slider
     value={value}
@@ -18,6 +19,7 @@ export default function SliderComponent({value, onValueChange, min, max, width, 
     minimumValue={min}
     maximumValue={max}
     style={{width: width, height: height}}
+    step={step}
     />
     )
     }

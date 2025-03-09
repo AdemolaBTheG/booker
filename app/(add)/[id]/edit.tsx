@@ -92,12 +92,7 @@ const bookFormats = [
  
 ]
 
-function Seperator(){
 
-  return(
-    <View className="w-full h-px bg-white/10 px-0"/>
-  )
-}
 
 
 export default function Edit() {

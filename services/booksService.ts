@@ -1,18 +1,55 @@
-import { Book, NewBook } from '@/lib/types';
+import { Book, NewBook, ReadingSession } from '@/lib/types';
 import supabase from '../lib/supabase';
 import 'react-native-url-polyfill/auto';
-import { drizzle, ExpoSQLiteDatabase, useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { books } from '@/db/schema';
+import {  ExpoSQLiteDatabase} from 'drizzle-orm/expo-sqlite';
+import { books, DbReadingSession, readingSessions,DbBook } from '@/db/schema';
 import { db } from '@/lib/db';
-import { useSQLiteContext } from 'expo-sqlite';
-import { count } from 'drizzle-orm';
-import { DbBook } from '@/db/schema';
+import { count, eq, sum } from 'drizzle-orm';
 class BooksService {
 
     private db: ExpoSQLiteDatabase;
     constructor(){
         this.db = db;
     }
+
+    public async getReadingSessions():Promise<DbReadingSession[]>{
+        try{
+            return await this.db.select().from(readingSessions);
+        }
+        catch(error){
+            console.error('Error getting reading sessions:', error);
+            return [];
+        }
+    }
+
+    public async getSessionsByBookId(bookId: number):Promise<DbReadingSession[]>{
+        try{
+            return await this.db.select().from(readingSessions).where(eq(readingSessions.bookId, bookId));
+        }
+        catch(error){
+            console.error('Error getting sessions by book ID:', error);
+            return [];
+        }
+    }
+
+   public async getBookStatistics(bookId: number){
+        try{
+            const totalPagesRead = await this.db.select({total: sum(readingSessions.pagesRead),count: count()}).from(readingSessions).where(eq(readingSessions.bookId, bookId));
+            
+                if(totalPagesRead[0].total !== null && totalPagesRead[0].count !== null){
+                    const averagePagesRead = Number(totalPagesRead[0].total) / Number(totalPagesRead[0].count);
+                    return averagePagesRead;
+                    
+                }
+                else{
+                    return 0;
+                }
+        }
+        catch(error){
+            console.error('Error getting book statistics:', error);
+            return [];
+        }
+    } 
 
     public async getBookById(id: string): Promise<DbBook>{
         try{
@@ -32,6 +69,57 @@ class BooksService {
         }
         catch(error){
             console.error('Error getting book by ID:', {
+                error,
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
+    }
+
+    public async getStartedAtPage(bookId: number):Promise<number>{
+        try{
+            const count = await this.db.$count(readingSessions);
+            const startedAtPage = await this.db.select({ startedAtPage: readingSessions.startedAtPage }).from(readingSessions).where(eq(readingSessions.bookId, bookId));
+            return startedAtPage[count-1].startedAtPage || 0;
+        }
+        catch(error){
+            console.error('Error getting started at page:', {
+                error,
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
+    }
+
+        public async getTotalReadPages(bookId: number):Promise<string>{
+        try{
+            const totalReadPages = await this.db.select({ total: sum(readingSessions.pagesRead) }).from(readingSessions).where(eq(readingSessions.bookId, bookId));
+            return totalReadPages[0].total || '0';
+        }
+        catch(error){
+            console.error('Error getting total read pages:', {
+                error,
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
+    }
+
+    public async addReadingSession(session: ReadingSession){
+
+        try{
+
+            if(!session){
+                throw new Error('Session is required');
+            }
+
+            await this.db.insert(readingSessions).values(session);
+        }
+        catch(error){
+            console.error('Error adding reading session:', {
                 error,
                 message: error instanceof Error ? error.message : 'Unknown error',
                 stack: error instanceof Error ? error.stack : undefined

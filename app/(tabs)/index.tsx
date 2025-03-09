@@ -73,7 +73,7 @@ export default  function Index() {
               <Pressable className="flex-row items-center justify-between border border-white/20  bg-white/15 px-2 py-3 rounded-lg active:opacity-70"> 
                 <View className="flex-row items-center gap-3">
                   <Icon name={item.icon as any} size={24} color="white" type="material" />
-                  <Text className="text-white text-base font-semibold">{item.title}</Text>
+                  <Text className="text-white text-base font-medium">{item.title}</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
                   <Text className="text-white/20 text-base font-semibold">{ data?.[0]?.count}</Text>
@@ -94,7 +94,6 @@ export default  function Index() {
    
     </ScrollView>
     <View className="absolute bottom-24 left-0 right-0">
-        <TimerComponent />
       </View>
     </View>
    

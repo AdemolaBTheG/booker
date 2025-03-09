@@ -18,12 +18,15 @@ export const books = sqliteTable('books',{
 })
 
 export const readingSessions = sqliteTable('reading_sessions', {
-  id: integer('id').primaryKey(),
+  id: integer('id').primaryKey({autoIncrement: true}),
   bookId: integer('book_id').notNull(),
-  startTime: integer('start_time').notNull(),
-  endTime: integer('end_time'),
   duration: integer('duration').notNull(),
-  createdAt: integer('created_at').notNull()
+  ended_at: integer('date').notNull(),
+  startedAtPage: integer('started_at_page').notNull(),
+  notes: text('notes'),
+  pagesRead: integer('pages_read').notNull(),
 });
 
 export type DbBook = typeof books.$inferSelect;
+
+export type DbReadingSession = typeof readingSessions.$inferSelect;

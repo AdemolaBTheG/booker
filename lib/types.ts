@@ -35,6 +35,17 @@ export interface BookDB {
     volumId?: string,
 }
 
+export interface ReadingSession {
+
+    bookId: number,
+    duration: number,
+    ended_at: number,
+    startedAtPage: number,
+    notes: string | null,
+    pagesRead: number,
+
+}
+
 export const bookSchema = z.object({
     title: z.string({message:"Title is required"}).min(1),
     authors: z.array(z.string()).optional(),
