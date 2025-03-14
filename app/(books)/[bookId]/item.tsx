@@ -147,27 +147,21 @@ export default function BookItem() {
         <Seperator />
 
         <Text className="text-white text-xl font-medium "> Statistics </Text>
-        <View className="flex-1 items-center justify-center w-full mt-3 px-4 py-4 bg-white/15 rounded-xl">
-        <View className="flex-1 flex-row w-full justify-between items-center ">
-          <Text className='text-white text-xl font-medium text-left'>Pages read</Text>
-          <Text className='text-white/80 text-base font-semibold text-right'>120</Text>
-          </View> 
-          <View style={{flex:1,height:'150',width:'100%',marginTop:12}}>
-            <BarChart color='#2196F3'/>
-          </View>
+        <View className="flex-1  w-full">
+        <BarChart color='#2196F3'/>
+
         </View>
-        <View className="flex-1 items-center justify-center w-full mt-4 px-4 py-4 bg-white/15 rounded-xl">
-        <View className="flex-1 flex-row w-full justify-between items-center">
-          <Text className='text-white text-xl font-medium text-left'>Minutes read</Text>
-          <Text className='text-white/80 text-base font-medium text-right'>120</Text>
-          </View> 
-          <View style={{flex:1,height:'150',width:'100%',marginTop:12}}>
-            <BarChart color='#F44336'/>
-          </View>
+        <View className='flex-1  w-full'>
+        <BarChart color='#2196F3'/>
+
         </View>
+        
+        
+       
+        
         <Seperator/>
         <Text className="text-white text-xl font-medium "> Notes </Text>
-        <FlatList horizontal={true} data={sessions} renderItem={({item}) => (
+        <FlatList horizontal={true} data={sessions} showsHorizontalScrollIndicator={false} renderItem={({item}) => (
           <>
             {item.notes ? (
           <View className="flex items-start justify-between   w-[300px] h-[120px] mt-3 p-4 bg-white/15 rounded-2xl ml-4"> 

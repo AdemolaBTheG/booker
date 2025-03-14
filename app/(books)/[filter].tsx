@@ -56,7 +56,7 @@ export default function Books() {
         />  
         <View className="flex flex-row justify-between items-center px-4 ">
             <Text className=" font-base text-lg text-white/40">{bookList.length} Books</Text>
-            <NativeDropDown items={[]} onSelect={() => {}} isEdit={false} />
+            <NativeDropDown items={[]} onSelect={() => {}} type='filter' />
         </View>
         {
             bookList.length < 0 ? (

@@ -240,7 +240,7 @@ const pickImageAsync = async () => {
           <View className="form-container ">
               <Text className= {`form-label ${form.formState.errors.format ? 'text-red-500' : 'text-white/40'}`}>Format</Text>
             
-         <NativeDropDown items={bookFormats} onSelect={(title) => form.setValue('format',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} isEdit={true} />
+         <NativeDropDown items={bookFormats} onSelect={(title) => form.setValue('format',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} type='edit' />
          <Controller control={form.control} name='format' render={({field: {onChange,value,onBlur}}) => (
          <TextInput className="hidden" 
          value={value} 
@@ -319,14 +319,14 @@ const pickImageAsync = async () => {
         <Text className='text-white text-sm font-medium px-2'>Reading Acivity</Text>
         <View className="form-select-container">
          <Text className= {`form-label ${form.formState.errors.readingStatus ? 'text-red-500' : 'text-white/40'}`}>Reading Status</Text>
-          <NativeDropDown items={readingStatus} onSelect={(title) => form.setValue('readingStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} isEdit={true} />
+          <NativeDropDown items={readingStatus} onSelect={(title) => form.setValue('readingStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} type='edit' />
         </View>
         </View>
         <View className="flex flex-col mt-7 gap-2 mb-40">
         <Text className='text-white text-sm font-medium px-2'>Collection & Ownership</Text>
         <View className="form-select-container">
          <Text className= {`form-label ${form.formState.errors.ownershipStatus ? 'text-red-500' : 'text-white/40'}`}>Ownership Status</Text>
-         <NativeDropDown items={ ownershipStatus} onSelect={(title) => form.setValue('ownershipStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} isEdit={true} />
+         <NativeDropDown items={ ownershipStatus} onSelect={(title) => form.setValue('ownershipStatus',title,{shouldDirty: true, shouldTouch: true,shouldValidate: true})} type='edit' />
         </View>
         </View>
        

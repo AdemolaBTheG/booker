@@ -11,11 +11,13 @@ export default function AddLayout() {
     screenOptions={{
         contentStyle:{
             backgroundColor: '#000000',
+            
           
         },
     
         headerStyle:{
             backgroundColor: '#000000',
+        
         },
         headerTitleStyle:{
             color: 'white',

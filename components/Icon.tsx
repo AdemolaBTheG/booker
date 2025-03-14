@@ -1,6 +1,8 @@
 import { ComponentProps } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleProp } from 'react-native';
+import { ViewStyle } from 'react-native';
 
 
 
@@ -10,10 +12,11 @@ type IconProps = {
   size?: number;
   color?: string;
   className?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
 
-export function Icon({ name, size = 24, color = 'white', className,type }: IconProps) {
+export function Icon({ name, size = 24, color = 'white', className,type,style }: IconProps) {
   return (
     type === 'material' ? (
       <MaterialIcons 
