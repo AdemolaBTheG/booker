@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView,Pressable, ImageBackground } from 'react-native'
 import { Image } from 'expo-image';
 import { Icon } from '@/components/Icon';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 function Seperator(){
@@ -66,13 +66,14 @@ function BookDetail({ book }: { book: Book }) {
 export default function Details() {
 
 
-
+  const queryClient = useQueryClient();
   const DESIRED_HEIGHT = 240;
   const aspectRatio = 42.67/61.33; 
   const CALCULATED_WIDTH = Math.round(DESIRED_HEIGHT * aspectRatio);
   console.log(CALCULATED_WIDTH,DESIRED_HEIGHT);
     const {id} = useLocalSearchParams<{id: string}>();
-    
+    const [textTruncated, setTextTruncated] = useState(false);
+
     const [book,setBook] = useState<Book | null>(null);
 
     const {data} = useQuery<Book>({
@@ -86,6 +87,8 @@ export default function Details() {
     useEffect(() => {
     
         if(data){
+          console
+          console.log(data.description)
           setBook(data);
         }
     }, [data]);
@@ -107,8 +110,16 @@ export default function Details() {
 
 
         <View className='mt-10 flex-1 w-full px-4'>
-          <Text className='text-white text-lg font-semibold text-left'>About</Text>
-          <Text className='text-white/80 text-base font-semibold text-left mt-4'>{book?.description || 'No description available'}</Text>
+          <Text className='text-white text-lg font-semibold text-left '>About</Text>
+            {book?.description  ? (
+              <Pressable style={{paddingBottom: 24 }}  onPress={() => router.push(`/${id}/description`)}>
+         
+                  <Text className='absolute bottom-0 right-0 text-white font-bold'>Read More</Text>
+              
+                  <Text className='text-white/80 text-base font-medium text-left mt-4' numberOfLines={4} ellipsizeMode='tail'>{book?.description} </Text></Pressable>
+            ) : (
+              <Text className='text-white/80 text-base font-semibold text-left mt-4'>No description available</Text>
+            )}
           <Seperator />
           {
             book && <BookDetail book={book} />

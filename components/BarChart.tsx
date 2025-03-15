@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { Icon } from "./Icon"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { useQuery } from "@tanstack/react-query"
-import { booksService } from "@/services/booksService"
+import { booksService, TimeSeriesResult, TimeUnit } from "@/services/booksService"
 import { Book, ReadingSession } from "@/lib/types"
 import { DbReadingSession } from "@/db/schema"
 import { isSameDay } from "date-fns"
@@ -26,7 +26,8 @@ type BarChartProps = {
 
   color: string,
   type: 'pages' | 'minutes',
-  bookId: string
+  data: TimeSeriesResult[] | undefined
+  timeUnit: TimeUnit,
 }
 
 type BarChartData = {
@@ -36,31 +37,15 @@ type BarChartData = {
 
 
 
-export default function BarChart({color,type,bookId}: BarChartProps) {
+export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
 
   const animatedHeight = useSharedValue(200)
   const animatedIconRotation = useSharedValue(0)
+  
 
-  const {data} = useQuery<DbReadingSession[]>({
-    queryKey: ['details', bookId],
-    queryFn: async () => {
-      if(bookId === "-1") {
-        return await booksService.getReadingSessions();
-      }
-      else{
-        return await booksService.getSessionsByBookId(Number(bookId));
-      }
-    }
-  })
-
-  useEffect(() => {
-    if(data){
-      getEntries();
-    }
-  },[data])
+  
   const font = useFont(require('../assets/fonts/SpaceMono-Regular.ttf'), 12) //Initializing fonts
   const toolTipFont = useFont(require('../assets/fonts/SpaceMono-Regular.ttf'), 14)
-  const [dayData,setDayData] = useState<BarChartData[]>([]);
 
   const {state,isActive} = useChartPressState({x:0,y:{data:0}}) //Initializing chart press state
  /* const yValue: SharedValue<string> = useDerivedValue(() => {
@@ -105,71 +90,37 @@ export default function BarChart({color,type,bookId}: BarChartProps) {
 
   }
 
-  const getEntries = () => {
-
-    if(!data) return [];
-
-
-    const entries = [];
-
-   
-
-    const DATA: BarChartData[] = []
-    
-    for (let index = 0; index < data.length; index++) {
-      const element = data[index];
-
-      if(isSameDay(new Date(element.ended_at),new Date())){
-        entries.push(element);
-      }
-    }
-    for(let index = 0; index < 24; index++){
-      const hourData: BarChartData = {
-        hour: index ,
-        data: 0
-      }
-      hourData.data = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
-      for(let index2 = 0; index2 < entries.length; index2++){
-        const element = entries[index2];
-     
-        if(index  === new Date(element.ended_at).getHours()){
-          console.log(index);
-          hourData.data += element.pagesRead;
-        }
-      }
-      DATA.push(hourData);
-    }
-    console.log(DATA);
-    setDayData(DATA);
-  }
- 
+  
   
   return (  
     <Pressable style={{flex:1,padding:16,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
       <View className="flex-row  justify-between items-center">
-      <View className="flex-col  ">
-      <Text className="text-white text-lg font-normal">{type === 'pages' ? 'Pages Read' : 'Minutes Spent'}</Text>
-      <Text style={{color:color,fontWeight:'bold',fontSize:28}}  >200</Text>
+      <View className="flex-col items-start">
+      <Text style={{color:'white',fontWeight:'semibold',fontSize:16}}>{type === 'pages' ? 'Pages Read' : 'Minutes Spent'}</Text>
+      <Text style={{color:color,fontWeight:'bold',fontSize:28,textAlign:'left'}}  > {type === 'pages' 
+    ? data?.reduce((sum, entry) => sum + entry.totalPages, 0) 
+    : data?.reduce((sum, entry) => sum + entry.totalMinutes, 0)}</Text>
+      
 
         </View>
         <AnimatedIonicons style={animatedIconStyle} name="chevron-down" size={24} color="rgba(255,255,255,0.5)"  />
       </View>
       <Animated.View style={animatedStyle}>
-        {dayData.length > 0 ? (
+      {data && data.length > 0 ? (
            <CartesianChart
-           data={dayData}
+           data={data}
            
          /* chartPressState={state}
            /**
             * 👇 the xKey should map to the property on data of you want on the x-axis
             */
-           xKey="hour"
+           xKey="timeKey"
            /**
             * 👇 the yKey is an array of strings that map to the data you want
             * on the y-axis. In this case we only want the listenCount, but you could
             * add additional if you wanted to show multiple song listen counts.
             */
-           domainPadding={{ left: 10, right: 10, top: 20 }}
+           domainPadding={{ left: 20, right: 20, top: 20 }}
            axisOptions={{
              /**
               * 👇 Pass the font object to the axisOptions.
@@ -184,21 +135,44 @@ export default function BarChart({color,type,bookId}: BarChartProps) {
               */
 
              formatXLabel: (value) => {
-              if(value.toString().length === 1){
-                return `0${value} `;
+              // Extract hour from timeKey (assuming format "YYYY-MM-DD HH")
+              switch(timeUnit) {
+                case TimeUnit.HOUR:
+                  // For hours: "2023-05-01 14" → "14h"
+                  const hour = value.split(' ')[1];
+                  return `${hour}h`;
+                  
+                case TimeUnit.DAY:
+                  // For days: "2023-05-01" → "May 1"
+                  const date = new Date(value);
+                  return date.toLocaleDateString(undefined, { weekday: 'short' });
+                  
+                case TimeUnit.MONTH:
+                  // For months: "2023-05" → "May"
+                  console.log(value)
+                  const [first, second,day] = value.split('-');
+                  return day;
+                  
+                case TimeUnit.YEAR:
+                  // For years: "2023" → "2023"
+                  const [year, month] = value.split('-');
+  const monthDate = new Date(parseInt(year), parseInt(month)-1, 1);
+  return monthDate.toLocaleDateString(undefined, { month: 'short' });
+                  
+                default:
+                  return value;
               }
-              return `${value} `;
             },
            
            }}
-           yKeys={["data"]}>
+           yKeys={type === 'pages' ? ["totalPages"] : ["totalMinutes"]}>
             
             
            {({ points, chartBounds }) => (
              <>
                <Bar
                chartBounds={chartBounds}  // 👈 chartBounds is needed to know how to draw the bars
-               points={points.data}
+               points={points[type === 'pages' ? "totalPages" : "totalMinutes"]}
                color={color}
                animate={{type:'spring'}}
                roundedCorners={{

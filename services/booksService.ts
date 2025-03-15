@@ -4,7 +4,26 @@ import 'react-native-url-polyfill/auto';
 import {  ExpoSQLiteDatabase} from 'drizzle-orm/expo-sqlite';
 import { books, DbReadingSession, readingSessions,DbBook } from '@/db/schema';
 import { db } from '@/lib/db';
-import { count, eq, sum } from 'drizzle-orm';
+import { and, avg, count, eq, gte, lte, sql, SQL, sum,desc } from 'drizzle-orm';
+import { format, startOfYear, endOfYear, startOfMonth, endOfMonth, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, eachYearOfInterval, addDays, addWeeks, addMonths, addYears, eachHourOfInterval } from 'date-fns';
+
+export enum TimeUnit{
+    HOUR = 'hour',
+    DAY = 'day',
+    WEEK = 'week',
+    MONTH = 'month',
+    YEAR = 'year'
+}
+
+
+export type TimeSeriesResult = {
+    timeKey: string;  // Can be day "2023-05-01", month "2023-05", etc.
+    totalPages: number;
+    totalSessions: number;
+    averagePages: number;
+    averageMinutes: number;
+    totalMinutes: number;
+  }
 class BooksService {
 
     private db: ExpoSQLiteDatabase;
@@ -22,6 +41,18 @@ class BooksService {
         }
     }
 
+    public async getLatestReadingSession(bookId: number):Promise<DbReadingSession | null>{
+        try{
+            const sessions = await this.db.select().from(readingSessions).where(eq(readingSessions.bookId, bookId)).orderBy(desc(readingSessions.id)).limit(1);
+
+            return sessions.length > 0 ? sessions[0] : null;
+
+        }
+        catch(error){
+            console.error('Error getting latest reading session:', error);
+            return null;
+        }
+    }
     public async getSessionsByBookId(bookId: number):Promise<DbReadingSession[]>{
         try{
             return await this.db.select().from(readingSessions).where(eq(readingSessions.bookId, bookId));
@@ -31,6 +62,116 @@ class BooksService {
             return [];
         }
     }
+
+    public async getTimeSeriesData(timeUnit: TimeUnit, startDate: Date,endDate: Date, bookId: number = -1): Promise<TimeSeriesResult[]>{
+        try{
+           let groupByexpression: SQL<unknown>;
+           let formatString: string;
+
+           switch(timeUnit){
+
+            case TimeUnit.HOUR:
+                groupByexpression = sql`strftime('%Y-%m-%d %H', ${readingSessions.ended_at}/1000, 'unixepoch', 'localtime')`;
+                formatString = 'yyyy-MM-dd HH';
+                break;
+            case TimeUnit.DAY:
+                groupByexpression = sql`strftime('%Y-%m-%d', ${readingSessions.ended_at}/1000, 'unixepoch', 'localtime')`;
+                formatString = 'yyyy-MM-dd';
+                break;
+            case TimeUnit.WEEK:
+                groupByexpression = sql`strftime('%Y-%m-%d', ${readingSessions.ended_at}/1000, 'unixepoch', 'localtime')`;
+                formatString = 'yyyy-MM-dd';
+                break;
+            case TimeUnit.MONTH:
+                    groupByexpression = sql`strftime('%Y-%m', ${readingSessions.ended_at}/1000, 'unixepoch', 'localtime')`;
+                    formatString = 'yyyy-MM';
+                break;
+            case TimeUnit.YEAR:
+                groupByexpression = sql`strftime('%Y', ${readingSessions.ended_at}/1000, 'unixepoch')`;
+                formatString = 'yyyy';
+                break;
+            default:
+                throw new Error(`Unsupported time unit: ${timeUnit}`);
+        }
+        let conditions = and(
+            gte(readingSessions.ended_at, startDate.getTime()),
+            lte(readingSessions.ended_at, endDate.getTime())
+        );
+        if(bookId !== -1){
+            conditions = and(conditions, eq(readingSessions.bookId, bookId));
+        }
+        
+        const results = await this.db.select({
+            timeKey: groupByexpression,
+            totalPages: sum(readingSessions.pagesRead) ,
+            totalSessions: count(),
+            averagePages: avg(readingSessions.pagesRead),
+            averageMinutes: sql `avg(${readingSessions.duration}) / 60000`,
+            totalMinutes: sql `sum(${readingSessions.duration}) / 60000`
+        })
+        .from(readingSessions)
+        .where(conditions)
+        .groupBy(groupByexpression);
+
+        console.log(results);
+
+        return results.map(result => ({
+            timeKey: String(result.timeKey),
+            totalPages: Number(result.totalPages) || 0,
+            totalSessions: Number(result.totalSessions) || 0,
+            averagePages: Number(result.averagePages) || 0,
+            averageMinutes: Number(result.averageMinutes) || 0,
+            totalMinutes: Number(result.totalMinutes) || 0
+        }));
+        }
+        catch(error){
+            console.error('Error getting time series data:', error);
+            return [];
+        }
+    }
+
+    public async getAllDaysInMonth(year: number, month: number, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        const startDate = new Date(year, month - 1, 1); // Month is 0-indexed in JS Date
+        const endDate = endOfMonth(startDate);
+        
+        return this.getCompleteTimeSeriesData(TimeUnit.DAY, startDate, endDate, bookId);
+      }
+      
+      public async getAllMonthsInYear(year: number, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        const startDate = startOfYear(new Date(year, 0, 1));
+        const endDate = endOfYear(startDate);
+        
+        return this.getCompleteTimeSeriesData(TimeUnit.MONTH, startDate, endDate, bookId);
+      }
+
+      public async getHoursInDay(date: Date, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        // Create start and end date for the specific day
+        const startDate = new Date(date);
+        startDate.setHours(0, 0, 0, 0); // Start of day
+        
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999); // End of day
+        
+        return this.getCompleteTimeSeriesData(TimeUnit.HOUR, startDate, endDate, bookId);
+    }
+
+    public async getDaysInWeek(date: Date, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        // Create start and end date for the specific day
+        const startDate = new Date(date);
+        console.log(startDate.getDate() - (startDate.getDay() - 1))
+        startDate.setDate(startDate.getDate() - (startDate.getDay() - 1));
+        console.log(startDate) // Start of week (0-indexed, 0 = Sunday)
+        
+        const endDate = new Date(date);
+        endDate.setDate(endDate.getDate() + (7 - endDate.getDay())); // End of week (7 days from start)
+        console.log(endDate)
+
+        return this.getCompleteTimeSeriesData(TimeUnit.DAY, startDate, endDate, bookId);
+    }
+      
+      
+
+    
 
    public async getBookStatistics(bookId: number){
         try{
@@ -51,7 +192,7 @@ class BooksService {
         }
     } 
 
-    public async getBookById(id: string): Promise<DbBook>{
+    public async getBookById(id: string): Promise<DbBook | null>{
         try{
             if(!id){
                 throw new Error('ID is required');
@@ -60,7 +201,7 @@ class BooksService {
             const book = (await this.db.select().from(books)).find(book => book.id === idNumber);
 
             if(!book){
-                throw new Error('Book not found');
+                return null;
             }
 
             return book;
@@ -289,6 +430,92 @@ class BooksService {
                 stack: error instanceof Error ? error.stack : undefined
             });
         }
+    }
+
+    public async getCompleteTimeSeriesData(timeUnit: TimeUnit, startDate: Date, endDate: Date, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        try {
+            // Get actual data from the database
+            const actualData = await this.getTimeSeriesData(timeUnit, startDate, endDate, bookId);
+            
+            // Create a map for quick lookup of actual data
+            const dataMap = new Map<string, TimeSeriesResult>();
+            actualData.forEach(item => {
+                dataMap.set(item.timeKey, item);
+            });
+            
+            // Generate all time periods in the range
+            let allPeriods: Date[] = [];
+            let formatString: string;
+            
+            switch(timeUnit) {
+                case TimeUnit.DAY:  
+                    allPeriods = eachDayOfInterval({ start: startDate, end: endDate });
+                    formatString = 'yyyy-MM-dd';
+                    break;
+                case TimeUnit.WEEK:
+                    allPeriods = eachWeekOfInterval({ start: startDate, end: endDate });
+                    formatString = 'yyyy-MM-dd';
+                    break;
+                case TimeUnit.MONTH:
+                    allPeriods = eachMonthOfInterval({ start: startDate, end: endDate });
+                    formatString = 'yyyy-MM';
+                    break;
+                case TimeUnit.YEAR:
+                    allPeriods = eachYearOfInterval({ start: startDate, end: endDate });
+                    formatString = 'yyyy';
+                    break;
+                case TimeUnit.HOUR:
+                    allPeriods = eachHourOfInterval({ start: startDate, end: endDate });
+                    formatString = 'yyyy-MM-dd HH';
+                    break;
+                default:
+                    throw new Error(`Unsupported time unit: ${timeUnit}`);
+            }
+            
+            // Create complete time series with zeros for missing data
+            const completeData: TimeSeriesResult[] = allPeriods.map(date => {
+                const timeKey = format(date, formatString);
+                const existingData = dataMap.get(timeKey);
+                
+                if (existingData) {
+                    return existingData;
+                } else {
+                    // Return a period with zero values
+                    return {
+                        timeKey,
+                        totalPages: 0,
+                        totalSessions: 0,
+                        averagePages: 0,
+                        averageMinutes: 0,
+                        totalMinutes: 0
+                    };
+                }
+            });
+            
+            return completeData;
+        } catch(error) {
+            console.error('Error getting complete time series data:', error);
+            return [];
+        }
+    }
+
+    // Convenience methods using the complete time series function
+    public async getAllDaysInMonthComplete(year: number, month: number, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        const startDate = new Date(year, month - 1, 1); // Month is 0-indexed in JS Date
+        const endDate = endOfMonth(startDate);
+        
+        return this.getCompleteTimeSeriesData(TimeUnit.DAY, startDate, endDate, bookId);
+    }
+
+    public async getAllMonthsInYearComplete(year: number, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        const startDate = startOfYear(new Date(year, 0, 1));
+        const endDate = endOfYear(startDate);
+        
+        return this.getCompleteTimeSeriesData(TimeUnit.MONTH, startDate, endDate, bookId);
+    }
+
+    public async getWeeksInRangeComplete(startDate: Date, endDate: Date, bookId: number = -1): Promise<TimeSeriesResult[]> {
+        return this.getCompleteTimeSeriesData(TimeUnit.WEEK, startDate, endDate, bookId);
     }
 
 }

@@ -6,7 +6,7 @@ import "../global.css";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Icon } from "@/components/Icon";
 import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
-import { ActivityIndicator, AppState, Platform } from "react-native";
+import { ActivityIndicator, Alert, AppState, Platform } from "react-native";
 import {useMigrations} from 'drizzle-orm/expo-sqlite/migrator'
 import migrations from '@/drizzle/migrations'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,8 +14,9 @@ import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import {PostHogProvider} from 'posthog-react-native'
 import { Text } from "react-native";
-import { useTimerStore } from '@/stores/useTimerStore';
+import Toast,{BaseToast} from 'react-native-toast-message';
 import Purchases from 'react-native-purchases';
+Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
 
 
 export default function RootLayout() {
@@ -33,11 +34,15 @@ export default function RootLayout() {
   useEffect(() => {
 
     if (Platform.OS === 'ios') {
-      if(!process.env.EXPO_PUBLIC_REVENUECAT_IOS){
-        Purchases.configure({apiKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS });
+      console.log("Were are on ios")
+      if(process.env.EXPO_PUBLIC_REVENUECAT_IOS){
+        Purchases.configure({apiKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS as string});
+      }
+      else{
+        Alert.alert('No API Key Found', 'Please add a RevenueCat API Key to the .env file')
       }
     }
-  },[])
+  },)
 
   // AppState tracking for timer
   
@@ -67,6 +72,19 @@ export default function RootLayout() {
 
   if (!loaded) {
     return null;
+  }
+
+  const toastConfig = {
+
+    success: (props: any) => (
+      <BaseToast
+      {...props}
+      style={{borderLeftColor: 'green',backgroundColor: '#1B1B1B', borderBottomRightRadius: 8, borderTopRightRadius: 8}}
+      contentContainerStyle={{backgroundColor: '#1B1B1B', borderBottomRightRadius: 8, borderTopRightRadius: 8}}
+      text1Style={{color: 'white',fontSize: 16,fontWeight: 'semibold',}}
+      text2Style={{color: 'rgba(255,255,255,0.5)',fontSize: 12,}}
+      />
+    )
   }
 
   return (
@@ -139,6 +157,7 @@ export default function RootLayout() {
           headerShown: false,
           presentation: 'modal',
         
+          
 
           
         }} 
@@ -157,6 +176,7 @@ export default function RootLayout() {
         options={{ 
           headerShown: true,
           headerTitle: 'Reading Session',
+          presentation: 'modal',
         }} 
       />
     
@@ -167,8 +187,9 @@ export default function RootLayout() {
       }} />
 
       <Stack.Screen name="(books)/[bookId]/timer" options={{
-          headerShown: true,
+          headerShown: false,
           headerTitle: 'Timer',
+          presentation: 'fullScreenModal',
       }} />
 
       <Stack.Screen name="(settings)" options={{
@@ -178,7 +199,7 @@ export default function RootLayout() {
 
       <Stack.Screen name="paywall" options={{
         headerShown: false,
-        
+        presentation: 'fullScreenModal',
       }} />
 
      
@@ -188,6 +209,8 @@ export default function RootLayout() {
   </PostHogProvider>
 
   </SQLiteProvider>
+  <Toast config={toastConfig} />
+
   </Suspense>
    
   );

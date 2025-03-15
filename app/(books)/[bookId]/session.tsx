@@ -3,40 +3,55 @@ import React, { useEffect, useState } from 'react'
 import SliderComponent from '@/components/SliderComponent'
 import  { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import DatePicker from '@/components/DatePicker';
-import { DbBook } from '@/db/schema';
 import { useLocalSearchParams } from 'expo-router';
-import { DbReadingSession } from '@/db/schema';
-import { useTimerStore } from '@/stores/useTimerStore';
 import { booksService } from '@/services/booksService';
 import { ReadingSession } from '@/lib/types';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Session() {
 
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [sliderValue, setSliderValue] = useState(0);
-    const {bookId} = useLocalSearchParams<{bookId: string}>(); //retrieve the book id from the url
-    const {accumulatedTime} = useTimerStore();
-    const [book, setBook] = useState<DbBook | null>(null);
-    const [totalReadPages, setTotalReadPages] = useState<number>(0);
-    const [progress, setProgress] = useState<number>(0);
+    const {bookId,time} = useLocalSearchParams<{bookId: string,time: string}>(); //retrieve the book id from the url
     const [bookNotes, setBookNotes] = useState<string>("");
     const onChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
         const currentDate = selectedDate;
         setDate(currentDate);
       };
+      console.log(time);
+      const {data : pastReadingSession} = useQuery({
+        queryKey: ['pastReadingSession'],
+        queryFn: async() => {
 
+            return await booksService.getLatestReadingSession(parseInt(bookId as string));
+        }
+      })
+      const {data : book} = useQuery({
+        queryKey: ['book'],
+        queryFn: async() => {
 
+            return await booksService.getBookById(bookId as string);
+        }
+      })
+
+      useEffect(() => {
+        if (pastReadingSession && book) {
+            console.log("pastReadingSession",pastReadingSession);
+        }
+      }, [pastReadingSession,book]);
+      
+      
       const addSession = async() =>{
 
         try{
 
             const session: ReadingSession = {
                 bookId: parseInt(bookId as string),
-                duration: accumulatedTime,
+                duration: parseInt(time as string),
                 ended_at: date?.getTime() || new Date().getTime(),
-                startedAtPage: totalReadPages,
+                startedAtPage: (pastReadingSession?.startedAtPage || 0) + (pastReadingSession?.pagesRead || 0),
                 notes: bookNotes,
-                pagesRead: sliderValue,
+                pagesRead: sliderValue - (pastReadingSession?.pagesRead || 0),
             }
 
          
@@ -56,36 +71,26 @@ export default function Session() {
 
         
   
-  
-
-      useEffect(() =>{
-        const fetchData = async() =>{
-            const book = await booksService.getBookById(bookId as string);
-            setBook(book);
-
-            const startedAtPage = await booksService.getStartedAtPage(parseInt(bookId as string));
-            if(startedAtPage){
-                setTotalReadPages(startedAtPage);
-            }
-
-
-
-
-        }
-        fetchData();
-      }, [bookId]);
+     
 
   return (
     <View className='flex-1 px-4'>
-        <View className='flex-col items-center mt-12'>
-            <Text className='text-white text-5xl font-bold'>{sliderValue}</Text>
-            <Text className='text-white/60 text-xl font-base'>out of {book?.pages || 0} pages read</Text>
-            <Text className="text-blue-600 text-lg font-medium mt-2">+{progress} pages</Text>
-
-        </View>
-        <View className='flex mt-4 items-center justify-center'>
-            <SliderComponent step={1} value={sliderValue} onValueChange={(value) => {setSliderValue(value); setProgress(value - totalReadPages)}} min={totalReadPages} max={book?.pages || 0} width={340} height={10} />
-        </View>
+        {
+            pastReadingSession && book && (
+                <>
+                 <View className='flex-col items-center mt-12'>
+                <Text className='text-white text-5xl font-bold'>{sliderValue}</Text>
+                <Text className='text-white/60 text-xl font-base'>out of {book?.pages || 0} pages read</Text>
+                <Text className="text-blue-600 text-lg font-medium mt-2">+{sliderValue - pastReadingSession?.pagesRead - pastReadingSession?.startedAtPage} pages</Text>
+    
+            </View>
+            <View className='flex mt-4 items-center justify-center'>
+                
+                <SliderComponent step={1} value={sliderValue} onValueChange={(value) => {setSliderValue(value)}} min={pastReadingSession?.pagesRead + pastReadingSession?.startedAtPage} max={book?.pages} width={340} height={10} />
+            </View>
+                </>
+            )
+        }
         <View className='flex items-center justify-center mt-12'>
             <View className='flex-row w-full items-center justify-center  mb-4'>
                 <Text className='text-white/60 mb-2 text-base flex-1 '>Date</Text>

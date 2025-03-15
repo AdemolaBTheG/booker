@@ -7,7 +7,6 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/lib/db";
 import { books } from "@/db/schema";
 import { count } from "drizzle-orm";
-import TimerComponent from "@/components/TimerComponent";
 const items = [
 
   {

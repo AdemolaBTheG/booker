@@ -4,7 +4,10 @@ import GoalArc from '@/components/GoalArc'
 import { Icon } from '@/components/Icon'
 import LineChart from '@/components/LineChart'
 import NativeDropDown from '@/components/NativeDropDown'
-import React from 'react'
+import { TimeSeriesResult, TimeUnit } from '@/services/booksService'
+import { booksService } from '@/services/booksService'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from 'react'
 import { View, Text, ScrollView } from 'react-native'
 
 const stats = [
@@ -25,8 +28,8 @@ const stats = [
     title: 'Year',
   },
   
-
 ]
+
 
 function StatsSeperator({showBorder}:{showBorder:boolean}) {
   return (
@@ -46,6 +49,41 @@ function HeaderSeperator() {
 }
 
 export default function Statistics() {
+
+  const queryClient = useQueryClient()
+  const [timeUnit, setTimeUnit] = useState<TimeUnit>(TimeUnit.HOUR)
+const {data} = useQuery<TimeSeriesResult[]>({
+  queryKey: ['timeSeriesData'],
+  queryFn: () => booksService.getHoursInDay(new Date(), -1)
+})
+
+async function changeTimeUnit(time: string) {
+  let newData: TimeSeriesResult[] = [];
+  switch(time){
+
+    case 'Today':
+    newData = await booksService.getHoursInDay(new Date(), -1)
+    setTimeUnit(TimeUnit.HOUR)
+      break;
+      case 'Week':
+        newData = await booksService.getDaysInWeek(new Date(), -1)
+        setTimeUnit(TimeUnit.DAY)
+        break;
+    case 'Month':
+      newData = await booksService.getAllDaysInMonth(new Date().getFullYear(), new Date().getMonth() + 1, -1)
+      setTimeUnit(TimeUnit.MONTH)
+      break;
+ 
+    case 'Year':
+      newData = await booksService.getAllMonthsInYear(new Date().getFullYear(),-1)
+      setTimeUnit(TimeUnit.YEAR)
+      break;
+  
+  }
+  queryClient.setQueryData(['timeSeriesData'], newData)
+}
+
+
   const ReadingHeatmap = require('@/components/ReadingHeatmap').default;
   
   return (
@@ -67,16 +105,15 @@ export default function Statistics() {
       <Text className='text-white text-xl font-medium text-left px-4'>Reading Activity</Text>
       <HeaderSeperator />
         <ReadingHeatmap />
-        <StatsSeperator showBorder={false} />
+        <StatsSeperator showBorder={false} /> 
         <View className='flex-row items-center justify-between px-4'>
           <Text className='text-white text-xl font-medium text-left px-4'>Trends</Text>
-          <NativeDropDown  items={stats}  type="stats" onSelect={() => {}}/>
+          <NativeDropDown  items={stats}  type="stats" onSelect={changeTimeUnit}/>
         </View>
-        <HeaderSeperator />
-        <View className="flex-1 px-4 gap-4">
-        <BarChart color='#F44336' type='pages' bookId='-1'/>
-        <BarChart color='#2196F3' type='minutes' bookId='-1'/>
-        <LineChart color='#ff7f0e'/>
+        <View className="flex-1 px-4 gap-4 mt-2">
+        <BarChart color='#F44336' type='pages'  data={data} timeUnit={timeUnit}/>
+        <BarChart color='#2196F3' type='minutes'  data={data} timeUnit={timeUnit}/>
+        <LineChart color='#ff7f0e' timeUnit={timeUnit} data={data}/>
         </View>
     </View>
    </ScrollView>

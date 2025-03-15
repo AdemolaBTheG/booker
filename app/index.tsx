@@ -1,6 +1,6 @@
 import { Link, Redirect, router, useRouter } from 'expo-router'
-import React from 'react'
-import { View,Text,Modal, Button } from 'react-native'
+import React, { useEffect } from 'react'
+import { View,Text,Modal, Button, Pressable } from 'react-native'
 import {booksService} from '@/services/booksService'
 import Donut from '@/components/Donut'
 import { CartesianChart, Bar} from 'victory-native'
@@ -8,7 +8,8 @@ import { LinearGradient, useFont, vec } from "@shopify/react-native-skia"
 import BarChart from '@/components/BarChart'
 import { Appearance, useColorScheme } from 'react-native';
 import RevenueCatUI from 'react-native-purchases-ui';
-
+import Purchases from 'react-native-purchases'
+import Toast from 'react-native-toast-message'
 
 const data = Array.from({ length: 6 }, (_, index) => ({
   // Starting at 1 for Jaunary
@@ -18,13 +19,42 @@ const data = Array.from({ length: 6 }, (_, index) => ({
 }))
 export default function Index() {
   const colorScheme = useColorScheme();
+
+  const showToast = () => {
+    Toast.show({
+      text1: 'Book added',
+      text2: 'Book added to your library',
+      type: 'success',
+      position: 'top',
+      topOffset: 80,
+    })
+  }
   
+  useEffect(() => {
+    console.log('test')
+
+    async function test() {
+    try {
+      console.log(process.env.EXPO_PUBLIC_REVENUECAT_IOS)
+      const offerings = await Purchases.getOfferings();
+      if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+        // Display packages for sale
+        console.log(offerings)
+      }
+    } catch (e) {
+      console.log(e)
+    }
+
+    }
+    test()
+  }, [])
 
   return (
     
     <View className='flex-1 bg-black items-center justify-center'>
       <Text className='text-white'>Go to home</Text>
       <Button title='Go to home' onPress={() => router.push('/(tabs)')} />
+        <Pressable className='bg-white/60 p-2 rounded-md mt-16' onPress={() => showToast()}><Text className='text-white'>Show toast</Text></Pressable>
     </View>
   )
 }

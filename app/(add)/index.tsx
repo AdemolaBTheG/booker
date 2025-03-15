@@ -30,52 +30,17 @@ function skeletonBookItem(){
 }
 
 // Book card component for horizontal lists
-function HorizontalBookCard({ book, onPress }: { book: Book, onPress: () => void }) {
-  return (
-    <Pressable 
-      onPress={onPress} 
-      className="mr-5 w-28 active:opacity-80"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-      }}
-    >
-      <View className="w-28">
-        <ExpoImage
-          source={{ uri: book?.thumbnail?.replace('http://', 'https://') }}
-          style={{ 
-            width: 112, 
-            height: 168, 
-            borderRadius: 8,
-          }}
-          contentFit="cover"
-          cachePolicy="disk"
-          transition={300}
-        />
-        <Text className="text-white mt-2 text-sm font-medium" numberOfLines={2}>
-          {book.title}
-        </Text>
-        <Text className="text-white/60 text-xs mt-0.5" numberOfLines={1}>
-          {book.authors}
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
+
 
 export default function Index() {
 
     const [query, setQuery] = useState('');
     const [books, setBooks] = useState<Book[]>([]);
     const skeletonItems = Array(10).fill(null);  // Show 6 skeleton items
-    const [prefetchedImages, setPrefetchedImages] = useState<Set<string>>(new Set());
     const debouncedQuery = useDebounce(query, 500); // 500ms delay
     
     // Sample bestsellers - in production this would come from an API
-    const [bestsellers, setBestsellers] = useState<Book[]>([]);
-    const [trendingBooks, setTrendingBooks] = useState<Book[]>([]);
+    
 
     const { data, isLoading } = useQuery<Book[]>({
         queryKey: ['books', debouncedQuery],
@@ -87,34 +52,15 @@ export default function Index() {
     });
 
     // Fetch bestsellers
-    const { data: bestsellersData, isLoading: bestsellersLoading } = useQuery<Book[]>({
-        queryKey: ['bestsellers'],
-        queryFn: async () => {
-            // In a real app, you'd call an API for bestsellers
-            return await booksService.searchBooks('bestseller 2023');
-        },
-    });
-
-    // Fetch trending books
-    const { data: trendingData, isLoading: trendingLoading } = useQuery<Book[]>({
-        queryKey: ['trending'],
-        queryFn: async () => {
-            // In a real app, you'd call an API for trending books
-            return await booksService.searchBooks('trending fiction');
-        },
-    });
+   
 
     useEffect(() => {
         if (data) {
             setBooks(data);
         }
-        if (bestsellersData) {
-            setBestsellers(bestsellersData.slice(0, 10));
-        }
-        if (trendingData) {
-            setTrendingBooks(trendingData.slice(0, 10));
-        }
-    }, [data, bestsellersData, trendingData]);
+       
+      
+    }, [data]);
 
   return (
     <View className='flex-1'>

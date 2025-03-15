@@ -45,7 +45,7 @@ export default function GoalArc() {
 
   
   return (
-    <View style={{height: '205', width: width,alignItems: 'center',justifyContent: 'center'}}>
+    <View style={{height: 205, width: width,alignItems: 'center',justifyContent: 'center'}}>
       <Canvas style={{flex:1,width:width}}>
         <Path path={skiaBackgroundPath} style='stroke' strokeCap='round' strokeWidth={strokeWidth} color='grey' />
         <Path path={skiaForegroundPath} style='stroke' strokeCap='round' start={0} end={animatedProgress} strokeWidth={strokeWidth} color='#513EC7' />

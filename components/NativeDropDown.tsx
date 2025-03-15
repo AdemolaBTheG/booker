@@ -17,7 +17,7 @@ export type NativeDropDownProps = {
 
 export default function NativeDropDown({ items, onSelect,type }: NativeDropDownProps) {
 
-  const [selectedItem, setSelectedItem] = useState<NativeDropDownProps['items'][number] | null>(items[0])
+  const [selectedItem, setSelectedItem] = useState<NativeDropDownProps['items'][number]  | null>(type === 'edit' ? null : items[0])
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -26,7 +26,7 @@ export default function NativeDropDown({ items, onSelect,type }: NativeDropDownP
         
           {type === 'edit' ? (
             <>
-              <Text className='text-white text-base font-medium'>{selectedItem?.title || 'Not selected'}</Text>
+              <Text className='text-white text-base font-medium'>{selectedItem?.title || 'Not selected'} </Text>
           <Icon name="chevron-expand" size={24} color="white" type="ionicons" />
             </>
           ) : type === 'filter' ? (

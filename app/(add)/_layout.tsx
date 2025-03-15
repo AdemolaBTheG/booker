@@ -17,6 +17,7 @@ export default function AddLayout() {
     
         headerStyle:{
             backgroundColor: '#000000',
+            
         
         },
         headerTitleStyle:{
@@ -52,7 +53,10 @@ n
             headerShown: true,
             headerTitle: 'Book Details',
         }} />
-   
+        <Stack.Screen name="[id]/description" options={{
+            headerShown: true,
+            headerTitle: 'Description',
+        }} />
      
     </Stack>
   )
