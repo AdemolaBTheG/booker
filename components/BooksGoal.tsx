@@ -1,24 +1,35 @@
 import { View, Text, FlatList } from 'react-native'
 import React from 'react'
 import { FlashList } from '@shopify/flash-list'
-const amountOfBooks = 10;
-
+import { useGoalStore } from '@/stores/goalStore';
+import { booksService } from '@/services/booksService';
+import { useQuery } from '@tanstack/react-query';
 export default function BooksGoal() {
+    const {bookGoal} = useGoalStore()
+    const {data} = useQuery({
+        queryKey: ['readingSessionsByBook'],
+        queryFn: () => booksService.getReadingSessionsByBook()
+    })
     const DESIRED_HEIGHT = 110;
   const aspectRatio = 42.67/61.33; 
   const CALCULATED_WIDTH = Math.round(DESIRED_HEIGHT * aspectRatio);
   return (
-            <FlashList 
+    <View className='flex w-full'>
+       <FlashList 
         horizontal={true}
-        data={Array.from({length: amountOfBooks}, (_, index) => index + 1)}
+        data={Array.from({length: bookGoal}, (_, index) => index + 1)}
         showsHorizontalScrollIndicator={false}
         renderItem={({item}) => (
-          <View style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT,margin:8,backgroundColor: 'rgba(255,255,255,0.15)',borderRadius: 16,alignItems: 'center',justifyContent: 'center'}}>
-            <Text className='text-white text-3xl font-regular'>{item}</Text>
+          <View>
+            <Text className='text-white text-lg font-medium'>{item}</Text>
+            
           </View>
         )}
         estimatedItemSize={DESIRED_HEIGHT}
       />
+    </View>
+
+           
       
    
   )

@@ -1,5 +1,6 @@
 import BarChart from '@/components/BarChart'
 import BooksGoal from '@/components/BooksGoal'
+import Calendar from '@/components/Calendar'
 import GoalArc from '@/components/GoalArc'
 import { Icon } from '@/components/Icon'
 import LineChart from '@/components/LineChart'
@@ -84,7 +85,6 @@ async function changeTimeUnit(time: string) {
 }
 
 
-  const ReadingHeatmap = require('@/components/ReadingHeatmap').default;
   
   return (
    <ScrollView className='flex-1  bg-black'>
@@ -102,9 +102,11 @@ async function changeTimeUnit(time: string) {
 
       <LongestStreak/>
       <StatsSeperate showBorder={true}/>
-      <Text className='text-white text-xl font-medium text-left px-4'>Reading Activity</Text>
+      <Text className='text-white text-xl font-medium text-left px-4'>Calendar</Text>
       <HeaderSeperator />
-        <ReadingHeatmap />
+      <View className='flex px-4'>
+        <Calendar/>
+      </View>
         <StatsSeperator showBorder={false} /> 
         <View className='flex-row items-center justify-between px-4'>
           <Text className='text-white text-xl font-medium text-left px-4'>Trends</Text>

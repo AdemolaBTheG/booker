@@ -174,12 +174,23 @@ export default function BookItem() {
           <View className='mt-16'>
             <Image source={{uri: book?.thumbnail?.replace('http://', 'https://')}} cachePolicy='disk'  contentFit='cover' style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 20,borderColor:"white",borderWidth:1}} />
           </View>
+          <View>
+          </View>
           <View className="flex items-center gap-1 mt-6 px-4">
               <Text className='text-center text-white text-xl font-bold'>{book?.title}</Text>
               <Text className='text-center text-white/80 text-base font-semibold'>{book?.authors}</Text>
             </View>
-            <Link href={`/(books)/${bookId}/timer`}  className="mt-6    rounded-full flex items-center justify-center"><Icon name='play-circle-outline' size={64} color='#513EC7' type='ionicons' /></Link>
-    
+            <View className='mt-6'>
+
+            {
+              readingSessions && readingSessions.length > 0 && readingSessions[readingSessions.length - 1].startedAtPage + readingSessions[readingSessions.length - 1].pagesRead >= book.pages ? (
+                <Icon name='checkmark-circle-outline' size={64} color='#22c55e' type='ionicons'  />
+              ) : (
+                <Link href={`/(books)/${bookId}/timer`}  className="mt-6    rounded-full flex items-center justify-center"><Icon name='play-circle-outline' size={64} color='#513EC7' type='ionicons' /></Link>
+              )
+            }
+                      </View>
+
             <View className="flex-1 w-full  items-center justify-center mt-12  py-4  bg-black rounded-t-[28px]">
            <View className='flex-col  w-full '>
             <View className='px-4'>

@@ -55,6 +55,20 @@ export default function OnboardingLayout() {
                     backgroundColor: '#000000'
                 }
             }}/>
+            <Stack.Screen name="readingGoal"
+            options={{
+                headerShown: true,
+                headerTitle: 'Reading Goal',
+                headerTitleStyle: {
+                    color: '#ffffff'
+                },
+                contentStyle: {
+                    backgroundColor: '#000000'
+                },
+                headerStyle: {
+                    backgroundColor: '#000000'
+                }
+            }}/>
         </Stack>
     )
 }

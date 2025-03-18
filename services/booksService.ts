@@ -66,6 +66,17 @@ class BooksService {
         }
     }
 
+    public async getReadingSessionsByBook(){
+
+        try{
+            return await this.db.select().from(readingSessions).groupBy(readingSessions.bookId);
+        }
+        catch(error){
+            console.error('Error getting reading sessions by book:', error);
+            return [];
+        }
+    }
+
     public async getCountOfFilters(): Promise<CountOfFilters> {
         try {
             // Get total count of all books

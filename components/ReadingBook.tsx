@@ -80,7 +80,6 @@ export default function ReadingBook() {
                     <Icon 
                       name="play-circle" 
                       size={42} 
-                      className="bg-white rounded-full p-2" 
                       color='#513EC7' 
                       type='ionicons' 
                     />

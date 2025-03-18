@@ -32,7 +32,7 @@ export default function NativeDropDown({ items, onSelect,type }: NativeDropDownP
           ) : type === 'filter' ? (
             <Icon name="swap-vert" size={24} color="white" type="material" />
           ) :  type === 'stats' ? (
-            <View className='flex-row items-center gap-2 border border-white/20 rounded-2xl px-3 py-2'>
+            <View className='flex-row items-center gap-2 border border-white/20 rounded-2xl px-3 py-3'>
             <Text className='text-white text-base font-medium'>{selectedItem?.title || 'Not selected'}</Text>
             <Icon name="chevron-down" size={24} color="white" type="ionicons" />
             </View>

@@ -55,10 +55,10 @@ export default function LineChart({color,timeUnit,data}:LineChartProps) {
     <Pressable style={{flex:1,paddingHorizontal:16,paddingVertical:8,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
           <View className="flex-row  justify-between items-center">
       <View className="flex-col  items-start justify-center">
-      <Text className="text-white text-lg font-normal">Reading speed</Text>
+      <Text className="text-white/60 text-base font-medium">READING SPEED</Text>
       <Text style={{color:color,fontWeight:'bold',fontSize:28}}  >{
       data && data.length > 0 ? (data?.reduce((sum,entry) => sum + entry.averagePages,0) / data?.length).toFixed(2) : 0
-      } <Text className='text-white/80 text-lg font-medium'>pages</Text></Text>
+      } <Text style={{color:'rgba(255,255,255,0.5)',fontSize:16}} className="font-semibold">Pages per hour</Text></Text>
 
         </View>
         <AnimatedIonicons style={animatedIconStyle} name="chevron-down" size={24} color="rgba(255,255,255,0.5)"  />

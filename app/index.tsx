@@ -12,15 +12,10 @@ import Purchases from 'react-native-purchases'
 import Toast from 'react-native-toast-message'
 import ProgressBar from '@/components/ProgressBar'
 import { usePostHog } from 'posthog-react-native'
+import Calendar from '@/components/Calendar'
+import { useQuery } from '@tanstack/react-query'
 
-const data = Array.from({ length: 6 }, (_, index) => ({
-  // Starting at 1 for Jaunary
-  month: index + 1,
-  // Randomizing the listen count between 100 and 50
-  listenCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
-}))
 export default function Index() {
-  const colorScheme = useColorScheme();
  
   const showToast = () => {
     Toast.show({
@@ -51,15 +46,18 @@ export default function Index() {
     test()
   }, [])
 
+
+
+
   return (
     
-    <View className='flex-1 bg-black items-center justify-center'>
-      <Link href='/(onboarding)' asChild>
-      <Text className='text-white'>Go to onboarding</Text>
+    <View className='flex-1 bg-black items-center justify-center w-full'>
+      <Link href="/(tabs)/statistics">
+        <Text className="text-white text-lg font-semibold">Go to statistics</Text>
       </Link>
-      <Text className='text-white'>Go to home</Text>
-      <Button title='Go to home' onPress={() => router.push('/(tabs)')} />
-        <Pressable className='bg-white/60 p-2 rounded-md mt-16' onPress={() => showToast()}><Text className='text-white'>Show toast</Text></Pressable>
+      <Link href="/(onboarding)">
+        <Text className="text-white text-lg font-semibold">Go to onboarding</Text>
+      </Link>
     </View>
   )
 }

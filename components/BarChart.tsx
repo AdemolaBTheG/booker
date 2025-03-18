@@ -14,12 +14,6 @@ import { isSameDay } from "date-fns"
 
 const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons)
 
-const DATA = Array.from({ length: 6 }, (_, index) => ({
-  // Starting at 1 for Jaunary
-  month: index + 1,
-  // Randomizing the listen count between 100 and 50
-  listenCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
-}))
 
 
 type BarChartProps = {
@@ -39,7 +33,7 @@ type BarChartData = {
 
 export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
 
-  const animatedHeight = useSharedValue(200)
+  const animatedHeight = useSharedValue(160)
   const animatedIconRotation = useSharedValue(0)
   
 
@@ -48,7 +42,7 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
   const toolTipFont = useFont(require('../assets/fonts/SpaceMono-Regular.ttf'), 14)
 
   const {state,isActive} = useChartPressState({x:0,y:{data:0}}) //Initializing chart press state
- /* const yValue: SharedValue<string> = useDerivedValue(() => {
+  const yValue: SharedValue<string> = useDerivedValue(() => {
     return state.y.data.value.value + (type === 'pages' ? " pages" : " minutes"); //Tooltip initalizing
   },[state])
 
@@ -62,7 +56,7 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
       return 0;
     }
     return (state.x.position.value - toolTipFont?.measureText(yValue.value.toString())?.width! / 2 )
-  },[state,toolTipFont]) */
+  },[state,toolTipFont]) 
 
   const animatedStyle = useAnimatedStyle(() => { //Animation for the view
     return {
@@ -81,7 +75,7 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
 
   const onPress = () => {  //Handling the press event with animations
     if(animatedHeight.value === 0){
-      animatedHeight.value = withTiming(200)
+      animatedHeight.value = withTiming(160)
       animatedIconRotation.value = withTiming(180)
     }else{
       animatedHeight.value = withTiming(0)
@@ -93,24 +87,23 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
   
   
   return (  
-    <Pressable style={{flex:1,paddingHorizontal:16,paddingVertical:8,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
-      <View className="flex-row  justify-between items-center">
-      <View className="flex-col items-start">
-      <Text style={{color:'white',fontWeight:'semibold',fontSize:16}}>{type === 'pages' ? 'Pages Read' : 'Minutes Spent'}</Text>
-      <Text style={{color:color,fontWeight:'bold',fontSize:28,textAlign:'left'}}  > {type === 'pages' 
+    <View style={{flex:1,paddingHorizontal:16,paddingVertical:8,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}}>
+      <Pressable className="flex-row  justify-between items-center" onPress={onPress}>
+      <View className="">
+      <Text className="text-white/60 text-base font-medium">{type === 'pages' ? 'PAGES' : 'MINUTES'}</Text>
+      <Text  style={{color:color,fontWeight:'bold',fontSize:32,textAlign:'left'}}  > {type === 'pages' 
     ? data?.reduce((sum, entry) => sum + entry.totalPages, 0) 
-    : data?.reduce((sum, entry) => sum + entry.totalMinutes, 0)}</Text>
+    : data?.reduce((sum, entry) => sum + entry.totalMinutes, 0)} <Text style={{color:'rgba(255,255,255,0.5)',fontSize:16,textAlign:'left'}} className="font-semibold">{type === 'minutes' ? 'Minutes' : 'Pages'}</Text></Text>
       
 
         </View>
         <AnimatedIonicons style={animatedIconStyle} name="chevron-down" size={24} color="rgba(255,255,255,0.5)"  />
-      </View>
+      </Pressable>
       <Animated.View style={animatedStyle}>
       {data && data.length > 0 ? (
            <CartesianChart
            data={data}
            
-         /* chartPressState={state}
            /**
             * 👇 the xKey should map to the property on data of you want on the x-axis
             */
@@ -183,7 +176,7 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
              />
                {isActive && (
                  <>
-                     {/* <SKText x={textXPosition} y={textYPosition} font={toolTipFont} color="white" text={yValue.value.toString()} /> */}
+                   <SKText x={textXPosition} y={textYPosition} font={toolTipFont} color="white" text={yValue.value.toString()} /> 
        
        
                      
@@ -200,7 +193,7 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
           <Text>No data</Text>
         )}
       </Animated.View>
-    </Pressable>
+    </View>
     
   )
 }
