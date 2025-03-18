@@ -12,7 +12,7 @@ import migrations from '@/drizzle/migrations'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import {PostHogProvider} from 'posthog-react-native'
+import { usePostHog, PostHogProvider } from 'posthog-react-native'
 import { Text } from "react-native";
 import Toast,{BaseToast} from 'react-native-toast-message';
 import Purchases from 'react-native-purchases';
@@ -73,7 +73,6 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
   const toastConfig = {
 
     success: (props: any) => (
@@ -93,29 +92,10 @@ export default function RootLayout() {
          databaseName="books.db"
           options={{enableChangeListener: true}} 
           useSuspense>
-            <PostHogProvider apiKey="phc_HjOdGfA46Ifh2JChDXT9iU2DWK1ITwuiPvdDQlrEGfi" options={{
+            <PostHogProvider apiKey="phc_HjOdGfA46Ifh2JChDXT9iU2DWK1ITwuiPvdDQlrEGfi" autocapture={true}  options={{
                           host: "https://eu.i.posthog.com",
                           enableSessionReplay: true,
-                          sessionReplayConfig: {
-                              // Whether text inputs are masked. Default is true.
-                              // Password inputs are always masked regardless
-                              maskAllTextInputs: true,
-                              // Whether images are masked. Default is true.
-                              maskAllImages: true,
-                              // Capture logs automatically. Default is true.
-                              // Android only (Native Logcat only)
-                              captureLog: true,
-                              // Whether network requests are captured in recordings. Default is true
-                              // Only metric-like data like speed, size, and response code are captured.
-                              // No data is captured from the request or response body.
-                              // iOS only
-                              captureNetworkTelemetry: true,
-                              // Deboucer delay used to reduce the number of snapshots captured and reduce performance impact. Default is 500ms
-                              androidDebouncerDelayMs: 500,
-                              // Deboucer delay used to reduce the number of snapshots captured and reduce performance impact. Default is 1000ms
-                              iOSdebouncerDelayMs: 1000,
-                          },
-
+                       
             }}>
 
                     <QueryClientProvider client={queryClient}>
@@ -177,6 +157,17 @@ export default function RootLayout() {
           headerShown: true,
           headerTitle: 'Reading Session',
           presentation: 'modal',
+        }} 
+      />
+      <Stack.Screen 
+        name="(onboarding)" 
+        options={{ 
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: '#000000'
+          },
+        
+          
         }} 
       />
     

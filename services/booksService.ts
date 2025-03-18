@@ -15,6 +15,18 @@ export enum TimeUnit{
     YEAR = 'year'
 }
 
+export type CountOfFilters = {
+    libraryCount: number;
+    readingCount: number;
+    finishedCount: number;
+    paperbackCount: number;
+    hardcoverCount: number;
+    ebookCount: number;
+    cancelledCount: number;
+    ownedCount: number;
+    notOwnedCount: number;
+    borrowedCount: number;
+}
 
 export type TimeSeriesResult = {
     timeKey: string;  // Can be day "2023-05-01", month "2023-05", etc.
@@ -23,6 +35,19 @@ export type TimeSeriesResult = {
     averagePages: number;
     averageMinutes: number;
     totalMinutes: number;
+  }
+
+  export type BookWithLatestSession = {
+    id: number;
+    title: string;
+    authors: string;
+    thumbnail: string;
+    pages: number;
+    latestSession: {
+      id: number;
+      startedAtPage: number;
+      pagesRead: number;
+    } | null;
   }
 class BooksService {
 
@@ -39,6 +64,109 @@ class BooksService {
             console.error('Error getting reading sessions:', error);
             return [];
         }
+    }
+
+    public async getCountOfFilters(): Promise<CountOfFilters> {
+        try {
+            // Get total count of all books
+            const totalBooks = await this.db.select({
+                count: count()
+            }).from(books);
+            
+            // Get count of reading books
+            const readingBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.readingStatus, 'Reading'));
+            
+            // Get count of finished books
+            const finishedBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.readingStatus, 'Finished'));
+
+            const cancelledBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.readingStatus, 'Cancelled'));
+            
+            // Get count of books by format
+            const paperbackBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.format, 'Paperback'));
+            
+            const hardcoverBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.format, 'Hardcover'));
+            
+            const ebookBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.format, 'eBook'));
+
+            const ownedBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.ownershipStatus, 'Owned'));
+
+            const notOwnedBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.ownershipStatus, 'Not Owned'));
+
+            const borrowedBooks = await this.db.select({
+                count: count()
+            }).from(books).where(eq(books.ownershipStatus, 'Borrowed'));
+            
+
+            // Return consolidated results
+            return {
+                libraryCount: totalBooks[0].count,
+                readingCount: readingBooks[0].count,
+                finishedCount: finishedBooks[0].count,
+                paperbackCount: paperbackBooks[0].count,
+                hardcoverCount: hardcoverBooks[0].count,
+                ebookCount: ebookBooks[0].count,
+                cancelledCount: cancelledBooks[0].count,
+                ownedCount: ownedBooks[0].count,
+                notOwnedCount: notOwnedBooks[0].count,
+                borrowedCount: borrowedBooks[0].count
+            };
+        }
+        catch(error) {
+            console.error('Error getting count of filters:', error);
+            return {
+                libraryCount: 0,
+                readingCount: 0,
+                finishedCount: 0,
+                paperbackCount: 0,
+                hardcoverCount: 0,
+                ebookCount: 0,
+                cancelledCount: 0,
+                ownedCount: 0,
+                notOwnedCount: 0,
+                borrowedCount: 0
+            };
+        }
+    }
+
+    public async getBooksByFilter(category:string,filter: string):Promise<DbBook[]>{
+
+        try{
+
+            if(category === 'Bookshelf'){
+                return await this.db.select().from(books).where(eq(books.readingStatus, filter));
+            }
+            else if(category === 'Formats'){
+                return await this.db.select().from(books).where(eq(books.format, filter));
+            }
+            else {
+                return await this.db.select().from(books).where(eq(books.ownershipStatus, filter));
+            }
+
+
+            
+        }
+        catch(error){
+            console.error('Error getting books by filter:', error);
+            return [];
+        }
+
+
     }
 
     public async getLatestReadingSession(bookId: number):Promise<DbReadingSession | null>{
@@ -61,6 +189,52 @@ class BooksService {
             console.error('Error getting sessions by book ID:', error);
             return [];
         }
+    }
+
+   
+
+    public async getBooksWithLatestSession(): Promise<BookWithLatestSession[]>{
+
+        try{
+
+            const booksWithSessions = await this.db.select({
+                id: books.id,
+                title: books.title,
+                authors: books.authors,
+                thumbnail: books.thumbnail,
+                pages: books.pages
+            }).from(books).innerJoin(readingSessions, eq(books.id, readingSessions.bookId)).groupBy(books.id);
+
+
+            const booksWithLatestSession: BookWithLatestSession[] = [];
+
+            for(const book of booksWithSessions){
+
+                const latetstSession = await this.db.select().from(readingSessions).where(eq(readingSessions.bookId,book.id)).orderBy(desc(readingSessions.id)).limit(1);
+
+
+                booksWithLatestSession.push({
+                    id: book.id,
+                    title: book.title,
+                    authors: book.authors || '',
+                    thumbnail: book.thumbnail || '',
+                    pages: book.pages,
+                    latestSession: {
+                        id: latetstSession[0].id,
+                        startedAtPage: latetstSession[0].startedAtPage,
+                        pagesRead: latetstSession[0].pagesRead
+                    }
+                });
+            }
+
+            return booksWithLatestSession;
+        }
+        catch(error){
+            console.error('Error getting books with latest session:', error);
+            return [];
+        }
+     
+
     }
 
     public async getTimeSeriesData(timeUnit: TimeUnit, startDate: Date,endDate: Date, bookId: number = -1): Promise<TimeSeriesResult[]>{
@@ -143,6 +317,7 @@ class BooksService {
         
         return this.getCompleteTimeSeriesData(TimeUnit.MONTH, startDate, endDate, bookId);
       }
+      
 
       public async getHoursInDay(date: Date, bookId: number = -1): Promise<TimeSeriesResult[]> {
         // Create start and end date for the specific day
@@ -518,6 +693,55 @@ class BooksService {
         return this.getCompleteTimeSeriesData(TimeUnit.WEEK, startDate, endDate, bookId);
     }
 
+    /**
+     * Gets all books with their latest reading session (if any)
+     * Returns all books regardless of whether they have sessions
+     */
+    public async getAllBooksWithLatestSession(): Promise<BookWithLatestSession[]> {
+        try {
+            // First get all books
+            const allBooks = await this.db.select({
+                id: books.id,
+                title: books.title,
+                authors: books.authors,
+                thumbnail: books.thumbnail,
+                pages: books.pages
+            }).from(books);
+
+            // Prepare result array
+            const booksWithLatestSession: BookWithLatestSession[] = [];
+
+            // For each book, try to find its latest session
+            for (const book of allBooks) {
+                const latestSession = await this.db.select()
+                    .from(readingSessions)
+                    .where(eq(readingSessions.bookId, book.id))
+                    .orderBy(desc(readingSessions.id))
+                    .limit(1);
+
+                booksWithLatestSession.push({ 
+                    id: book.id,
+                    title: book.title,
+                    authors: book.authors || '',
+                    thumbnail: book.thumbnail || '',
+                    pages: book.pages,
+                    latestSession: latestSession.length > 0 
+                        ? {
+                            id: latestSession[0].id,
+                            startedAtPage: latestSession[0].startedAtPage,
+                            pagesRead: latestSession[0].pagesRead
+                        }
+                        : null // No sessions for this book
+                });
+            }
+
+            return booksWithLatestSession;
+        }
+        catch (error) {
+            console.error('Error getting all books with latest session:', error);
+            return [];
+        }
+    }
 }
 
 export const booksService = new BooksService();

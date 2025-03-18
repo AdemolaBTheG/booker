@@ -7,6 +7,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { booksService } from '@/services/booksService';
 import { ReadingSession } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import Toast from 'react-native-toast-message';
 
 export default function Session() {
 
@@ -14,6 +16,7 @@ export default function Session() {
     const [sliderValue, setSliderValue] = useState(0);
     const {bookId,time} = useLocalSearchParams<{bookId: string,time: string}>(); //retrieve the book id from the url
     const [bookNotes, setBookNotes] = useState<string>("");
+    const router = useRouter();
     const onChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
         const currentDate = selectedDate;
         setDate(currentDate);
@@ -56,7 +59,15 @@ export default function Session() {
 
          
             await booksService.addReadingSession(session);
-            console.log('Session added successfully');
+           
+            router.replace(`/(books)/${bookId}/item`);
+            console.log('Session added successfully'); Toast.show({
+                text1: 'Session added',
+                text2: 'Session added successfully',
+                type: 'success',
+                position: 'top',
+                topOffset: 80,
+              })
         }
         catch(error){
             console.error('Error adding session:', {
@@ -76,17 +87,17 @@ export default function Session() {
   return (
     <View className='flex-1 px-4'>
         {
-            pastReadingSession && book && (
+             book && (
                 <>
                  <View className='flex-col items-center mt-12'>
                 <Text className='text-white text-5xl font-bold'>{sliderValue}</Text>
                 <Text className='text-white/60 text-xl font-base'>out of {book?.pages || 0} pages read</Text>
-                <Text className="text-blue-600 text-lg font-medium mt-2">+{sliderValue - pastReadingSession?.pagesRead - pastReadingSession?.startedAtPage} pages</Text>
+                <Text className="text-blue-600 text-lg font-medium mt-2">+{sliderValue - (pastReadingSession?.pagesRead || 0) - (pastReadingSession?.startedAtPage || 0)} pages</Text>
     
             </View>
             <View className='flex mt-4 items-center justify-center'>
                 
-                <SliderComponent step={1} value={sliderValue} onValueChange={(value) => {setSliderValue(value)}} min={pastReadingSession?.pagesRead + pastReadingSession?.startedAtPage} max={book?.pages} width={340} height={10} />
+                <SliderComponent step={1} value={sliderValue} onValueChange={(value) => {setSliderValue(value)}} min={(pastReadingSession?.pagesRead || 0) + (pastReadingSession?.startedAtPage || 0)} max={book?.pages} width={340} height={10} />
             </View>
                 </>
             )

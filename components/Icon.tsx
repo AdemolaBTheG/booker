@@ -1,9 +1,9 @@
 import { ComponentProps } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleProp } from 'react-native';
+import { StyleProp, TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
-
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 
 type IconProps = {
@@ -12,7 +12,7 @@ type IconProps = {
   size?: number;
   color?: string;
   className?: string;
-  style?: StyleProp<ViewStyle>;
+  style?: StyleProp<TextStyle>;
 };
 
 
@@ -24,14 +24,23 @@ export function Icon({ name, size = 24, color = 'white', className,type,style }:
         size={size} 
         color={color} 
         className={className}
+        style={style}
       />
-    ) : (
+    ) :  type === 'ionicons' ? (
       <Ionicons 
         name={name as any} 
         size={size} 
         color={color} 
         className={className}
+        style={style}
       />
-    )
-  );
-} 
+    ) :   (
+      <MaterialCommunityIcons
+        name={name as any} 
+        size={size} 
+        color={color} 
+        className={className}
+        style={style}
+      />
+  ))
+}   

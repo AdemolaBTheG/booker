@@ -36,7 +36,7 @@ const stats = [
 
 export function Seperator(){
   return (
-    <View className='w-full h-[1px] bg-white/20 my-6 px-4' />
+    <View className='w-[90%] h-[1px] bg-white/20 my-6 mx-auto' />
   )
 }
 
@@ -178,24 +178,38 @@ export default function BookItem() {
               <Text className='text-center text-white text-xl font-bold'>{book?.title}</Text>
               <Text className='text-center text-white/80 text-base font-semibold'>{book?.authors}</Text>
             </View>
-            <Link href={`/(books)/${bookId}/timer`}  className="mt-6  p-4 bg-cta rounded-full flex items-center justify-center"><Icon name='play' size={32} color='white' type='ionicons' /></Link>
+            <Link href={`/(books)/${bookId}/timer`}  className="mt-6    rounded-full flex items-center justify-center"><Icon name='play-circle-outline' size={64} color='#513EC7' type='ionicons' /></Link>
     
             <View className="flex-1 w-full  items-center justify-center mt-12  py-4  bg-black rounded-t-[28px]">
            <View className='flex-col  w-full '>
             <View className='px-4'>
             <Text className="text-white text-xl font-medium mt-6"> Logs </Text>
-            <View className="flex flex-row items-center justify-between  w-full mt-3 px-4  bg-white/15 py-3 rounded-3xl"> 
+            <View className="flex flex-row items-center justify-between w-full mt-3 px-4 bg-white/15 py-3 rounded-3xl"> 
               <View className="flex-col items-center justify-center gap-2">
                 <View className="flex-col items-start justify-center">
-                <Text className="text-white text-base font-medium">{readingSessions[readingSessions.length - 1].startedAtPage + readingSessions[readingSessions.length - 1].pagesRead} out of {book.pages} pages read</Text>
-                <Text className="text-white/60 text-base font-medium">Reading since {new Date(readingSessions[0].ended_at).toLocaleDateString()}</Text>
-                <Text className='text-white/60 text-base text- font-medium mt-2'>{ readingSessions?.reduce((acc, session) => acc + session.pagesRead, 0) / (readingSessions?.length || 1) } pages / session</Text>
-    
+                  {readingSessions && readingSessions.length > 0 ? (
+                    <>
+                      <Text className="text-white text-base font-medium">
+                        {(readingSessions[readingSessions.length - 1]?.startedAtPage || 0) + 
+                          (readingSessions[readingSessions.length - 1]?.pagesRead || 0)} out of {book.pages} pages read
+                      </Text>
+                      <Text className="text-white/60 text-base font-medium">
+                        Reading since {readingSessions[0]?.ended_at ? new Date(readingSessions[0].ended_at).toLocaleDateString() : 'N/A'}
+                      </Text>
+                      <Text className='text-white/60 text-base text-center font-medium mt-2'>
+                        {readingSessions.reduce((acc, session) => acc + (session.pagesRead || 0), 0) / (readingSessions.length || 1)} pages / session
+                      </Text>
+                    </>
+                  ) : (
+                    <Text className="text-white text-base font-medium">No reading sessions yet</Text>
+                  )}
                 </View>
-    
               </View>
               <Donut 
-                percentage={readingSessions[readingSessions.length - 1].pagesRead + readingSessions[readingSessions.length - 1].startedAtPage / book.pages * 100} 
+                percentage={readingSessions && readingSessions.length > 0 
+                  ? ((readingSessions[readingSessions.length - 1]?.pagesRead || 0) + 
+                     (readingSessions[readingSessions.length - 1]?.startedAtPage || 0)) / book.pages * 100 
+                  : 0} 
                 max={100} 
               />
             </View>
@@ -218,22 +232,27 @@ export default function BookItem() {
             <Seperator/>
             <Text className="text-white text-xl font-medium px-4"> Notes </Text>
             <View className="flex-1 w-full">
-            <FlatList horizontal={true} data={readingSessions} showsHorizontalScrollIndicator={false} renderItem={({item}) => (
-              <>
-                {item.notes ? (
-              <View className="flex items-start justify-between   w-[300px] h-[120px] mt-3 p-4 bg-white/15 rounded-2xl ml-4"> 
-              <Text className='text-white text-base font-medium ' numberOfLines={2} >{item.notes}</Text>
-              <View className="flex-row items-center justify-between mt-4 w-full">
-                <Text className='text-white/80 text-base font-medium'>{new Date(item.ended_at).toLocaleDateString()}</Text>
-                <Text className='text-white/80 text-base font-medium'>Pages {item.startedAtPage} - {item.startedAtPage + item.pagesRead}</Text>
-              </View>
-            </View>
-            ) : (
-              <></>
-            )}
-              </>
-            
-            )} />
+              {
+                readingSessions && readingSessions.length > 0 ? (   <FlatList horizontal={true} data={readingSessions} showsHorizontalScrollIndicator={false} renderItem={({item}) => (
+                  <>
+                    {item.notes && (
+                  <View className="flex items-start justify-between   w-[300px] h-[100px] mt-3 p-4 bg-white/15 rounded-2xl ml-4"> 
+                  <Text className='text-white text-base font-medium ' numberOfLines={2} >{item.notes}</Text>
+                  <View className="flex-row items-center justify-between mt-4 w-full">
+                    <Text className='text-white/80 text-base font-medium'>{new Date(item.ended_at).toLocaleDateString()}</Text>
+                    <Text className='text-white/80 text-base font-medium'>Pages {item.startedAtPage} - {item.startedAtPage + item.pagesRead}</Text>
+                  </View>
+                </View>
+                )}
+                  </>
+                
+                )} />) : (
+                  <View className='flex items-center justify-center '>
+                    <Text className='text-white text-base font-medium'>No notes yet</Text>
+                  </View>
+                )
+              }
+         
             </View>
             
     

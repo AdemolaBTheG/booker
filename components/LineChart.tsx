@@ -52,7 +52,7 @@ export default function LineChart({color,timeUnit,data}:LineChartProps) {
     }
 
   return (
-    <Pressable style={{flex:1,padding:16,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
+    <Pressable style={{flex:1,paddingHorizontal:16,paddingVertical:8,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
           <View className="flex-row  justify-between items-center">
       <View className="flex-col  items-start justify-center">
       <Text className="text-white text-lg font-normal">Reading speed</Text>

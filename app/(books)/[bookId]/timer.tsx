@@ -44,31 +44,30 @@ const TimerControls = React.memo(({
   onStop: () => void;
 }) => {
   return (
-    <View className="flex-row gap-8 mt-20">
+    <View className="flex-row gap-8 mt-20 items-center justify-center">
       <Pressable 
-        className="border border-white/50 p-6 rounded-full"
+        className="border-[5px] border-white/50 p-3 rounded-full"
         onPress={onReset}
       >
         <Icon name="timer" size={36} color="rgba(255,255,255,0.5)" type="ionicons" />
       </Pressable>
       
       <Pressable 
-        className="bg-cta p-6 rounded-full"
+        className=""
         onPress={onPlayPause}
       >
         <Icon 
-          name={isRunning ? 'pause' : 'play'} 
-          size={36} 
-          color="white" 
+          name={isRunning ? 'pause-circle-outline' : 'play-circle-outline'} 
+          size={82} 
+          color="#513EC7" 
           type="ionicons"
         />
       </Pressable>
       
       <Pressable 
-        className="border border-white/50 p-6 rounded-full"
         onPress={onStop}
       >
-        <Icon name="stop" size={36} color="rgba(255,255,255,0.5)" type="ionicons" />
+        <Icon name="stop-circle-outline" size={82} color="rgba(255,255,255,0.5)" type="ionicons" />
       </Pressable>
     </View>
   );

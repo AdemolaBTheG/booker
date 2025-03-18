@@ -7,93 +7,199 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/lib/db";
 import { books } from "@/db/schema";
 import { count } from "drizzle-orm";
-const items = [
+import { useState, useMemo } from "react";
+import Collapsible from "@/components/Collapsible";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import ReadingBook from "@/components/ReadingBook";
+import { usePostHog } from "posthog-react-native";
 
+const formatItems = [
   {
-
-    icon:'book',
-    title: 'Library',
-    href: '/library'
+    icon:'book-open-page-variant',
+    title: 'Paperback',
+    href: '/library',
+    type: 'materialCommunity'
   },
   {
-
-    icon:'collections',
-    title: 'Collection',
-    href: '/collection'
+    icon:'book-variant-multiple',
+    title: 'Hardcover',
+    href: '/library',
+    type: 'materialCommunity'
   },
   {
-
-    icon:'category',
-    title: 'Category',
-    href: '/category'
+    icon:'phone-portrait',
+    title: 'eBook',
+    href: '/library',
+    type: 'ionicons'
   },
-  {
-
-    icon:'person',
-    title: 'Author',
-    href: '/author'
-  },
-  {
-
-    icon:'house',
-    title: 'Publisher',
-    href: '/publisher'
-  },
-  
-
-
-
 ]
 
+const ownershipItems = [
+  {
+    icon:'cart',
+    title: 'Owned',
+    href: '/collection',
+    type: 'ionicons'
+  },
+  {
+    icon:'lock-closed',
+    title: 'Not Owned',
+    href: '/category',
+    type: 'ionicons'
+  },
+  {
+    icon:'time',
+    title: 'Borrowed',
+    href: '/collection',
+    type: 'ionicons'
+  }
+]
+const libraryItems = [
+  {
+    icon:'library',
+    title: 'Library',
+    href: '/library',
+    type: 'ionicons'
+  },
+  {
+    icon:'book-clock',
+    title: 'Reading',
+    href: '/collection',
+    type: 'materialCommunity'
+  },
+  {
+    icon:'checkmark-done',
+    title: 'Finished',
+    href: '/category',
+    type: 'ionicons'
+  },
+  {
+    icon:'close',
+    title: 'Cancelled',
+    href: '/author',
+    type: 'ionicons'
+  },
+]
 
 export default  function Index() {
+  const queryClient = useQueryClient();
+  
+  const { data: countOfFilters = {
+    libraryCount: 0,
+    readingCount: 0,
+    finishedCount: 0,
+    paperbackCount: 0,
+    hardcoverCount: 0,
+    ebookCount: 0,
+    cancelledCount: 0,
+    ownedCount: 0,
+    notOwnedCount: 0,
+    borrowedCount: 0
+  }} = useQuery({
+    queryKey: ['countOfFilters'],
+    queryFn: async () => {
+      return await booksService.getCountOfFilters();
+    }
+  });
+  
+  // Create the data arrays with count values from the query
+  const formatItems = useMemo(() => [
+    {
+      icon: 'book-open-page-variant',
+      title: 'Paperback',
+      href: '/library',
+      type: 'materialCommunity',
+      count: countOfFilters.paperbackCount
+    },
+    {
+      icon: 'book-variant-multiple',
+      title: 'Hardcover',
+      href: '/library',
+      type: 'materialCommunity',
+      count: countOfFilters.hardcoverCount
+    },
+    {
+      icon: 'phone-portrait',
+      title: 'eBook',
+      href: '/library',
+      type: 'ionicons',
+      count: countOfFilters.ebookCount
+    },
+  ], [countOfFilters]);
+  
+  const libraryItems = useMemo(() => [
+    {
+      icon: 'library',
+      title: 'Library',
+      href: '/library',
+      type: 'ionicons',
+      count: countOfFilters.libraryCount
+    },
+    {
+      icon: 'book-clock',
+      title: 'Reading',
+      href: '/collection',
+      type: 'materialCommunity',
+      count: countOfFilters.readingCount
+    },
+    {
+      icon: 'checkmark-done',
+      title: 'Finished',
+      href: '/category',
+      type: 'ionicons',
+      count: countOfFilters.finishedCount
+    },
+    {
+      icon: 'close',
+      title: 'Cancelled',
+      href: '/author',
+      type: 'ionicons',
+      count: countOfFilters.cancelledCount
+    },
+  ], [countOfFilters]);
 
-  const {data} = useLiveQuery(db.select({ count: count() }).from(books));
-  console.log(data);
+  const ownershipItems = useMemo(() => [
+    {
+      icon:'cart',
+      title: 'Owned',
+      href: '/collection',
+      type: 'ionicons',
+      count: countOfFilters.ownedCount
+    },
+    {
+      icon:'lock-closed',
+      title: 'Not Owned',
+      href: '/category',
+      type: 'ionicons',
+      count: countOfFilters.notOwnedCount
+    },
+    {
+      icon:'time',
+      title: 'Borrowed',
+      href: '/collection',
+      type: 'ionicons',
+      count: countOfFilters.borrowedCount
+    }
+  ], [countOfFilters]);
 
+  // Other ownership items can be handled similarly
+  
   return (
     <View className="flex-1 bg-black">
      
        <ScrollView className="flex-1 bg-black">
-       <View className="flex-1  px-4">
-      <Text className="text-white text-4xl font-semibold mt-5">Booker</Text>
-      <View className="rounded-lg bg-white/15 px-2 py-3 mt-10 gap-3 border border-white/20 flex items-center justify-center">
-        <Text className="text-white/40  text-base text-center">Add Your First Book & Transform Your Reading Journey - Start Tracking Today!</Text>
-        <TouchableOpacity onPress={() => router.push('/(add)')} className="bg-cta rounded-lg px-4 py-2 mt-2 flex-row items-center">
-          <Icon name="add" size={20} type="material" />
-          <Text  className="text-white font-semibold ml-1">Add Your First Book</Text>
-        </TouchableOpacity>
-      </View>
-      <View className="mt-6">
-        <Text className="text-white text-xl font-semibold">Bookshelf</Text>
-        <View className="flex-col mt-4 gap-3">
-          {items.map((item) => (
-            <Link href={{pathname: `/(books)/${item.title}`}}  key={item.title} asChild>
-              <Pressable className="flex-row items-center justify-between border border-white/20  bg-white/15 px-2 py-3 rounded-lg active:opacity-70"> 
-                <View className="flex-row items-center gap-3">
-                  <Icon name={item.icon as any} size={24} color="white" type="material" />
-                  <Text className="text-white text-base font-medium">{item.title}</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-white/20 text-base font-semibold">{ data?.[0]?.count}</Text>
-                <Icon 
-                  name="chevron-right" 
-                  size={24} 
-                  color="rgba(255, 255, 255, 0.2)"
-                  type="material"
-                />
-                </View>
-               
-              </Pressable>
-            </Link>
-          ))}
-        </View>
-      </View>
+       
+       <View className="flex-1 gap-8 mt-8  px-4">
+       <ReadingBook />
+     <Collapsible title="Bookshelf" data={libraryItems}/>
+     <Collapsible title="Formats" data={formatItems}/>
+     <Collapsible title="Ownership" data={ownershipItems}/>
+
+     
     </View>
-   
+      <View className="mt-28"/>
     </ScrollView>
-    <View className="absolute bottom-24 left-0 right-0">
-      </View>
+   
     </View>
    
 

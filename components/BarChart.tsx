@@ -93,7 +93,7 @@ export default function BarChart({color,type,data,timeUnit}: BarChartProps) {
   
   
   return (  
-    <Pressable style={{flex:1,padding:16,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
+    <Pressable style={{flex:1,paddingHorizontal:16,paddingVertical:8,gap:8,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:16}} onPress={onPress}>
       <View className="flex-row  justify-between items-center">
       <View className="flex-col items-start">
       <Text style={{color:'white',fontWeight:'semibold',fontSize:16}}>{type === 'pages' ? 'Pages Read' : 'Minutes Spent'}</Text>

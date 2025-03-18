@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams,useNavigation } from 'expo-router';
+import React, { useEffect, useState, useMemo } from 'react'
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import SearchBar from '@/components/SearchBar';
 import NativeDropDown from '@/components/NativeDropDown';
 import { booksService } from '@/services/booksService';
@@ -10,6 +10,7 @@ import { books, DbBook } from '@/db/schema';
 import { FlashList } from '@shopify/flash-list';
 import BookItem from '@/components/BookItem';
 import Book from '@/components/Book';
+import { useQuery } from '@tanstack/react-query';
 
 async function getBooks(): Promise<DbBook[]>{
     const data = await booksService.getBooks();
@@ -17,58 +18,61 @@ async function getBooks(): Promise<DbBook[]>{
 }   
 
 export default function Books() {
-
-    const {filter} = useLocalSearchParams();
+    const {filter, title} = useLocalSearchParams();
     const navigation = useNavigation();
-    const [bookList, setBookList] = useState<DbBook[]>([]);
-    
-    console.log(filter);
-
     const [search, setSearch] = useState('');
-  
-
- 
- 
-
-    useEffect(() => {
-        navigation.setOptions({
-            headerTitle: filter
-        })
-        const loadBooks = async () => {
-            const data = await getBooks();
-            setBookList(data);
-           
+    
+    const {data: booksData} = useQuery({
+        queryKey: ['books', filter, title],
+        queryFn: async () => {
+            if(filter === 'Library') {
+                return await booksService.getBooks();
+            } else {
+                return await booksService.getBooksByFilter(title as string, filter as string);
+            }
         }
-        loadBooks();
-    }, [])
+    });
 
-    useEffect(() => {
-        console.log(bookList);
-    }, [bookList])
+    // Filter books based on search term (do filtering before rendering)
+    const filteredBooks = useMemo(() => {
+        if (!booksData) return [];
+        if (!search.trim()) return booksData;
+        
+        return booksData.filter(book => 
+            book.title.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [booksData, search]);
 
-  return (
-    <ScrollView className="flex-1 ">
-        <SearchBar 
-            onChangeText={(text: string) => setSearch(text)} 
-            value={search} 
-            placeholder="Search"
-            showBorder={false} 
-        />  
-        <View className="flex flex-row justify-between items-center px-4 ">
-            <Text className=" font-base text-lg text-white/40">{bookList.length} Books</Text>
-            <NativeDropDown items={[]} onSelect={() => {}} type='filter' />
-        </View>
-        {
-            bookList.length < 0 ? (
-                    <Text className='text-white text-base font-medium'>No books found</Text>
-            ) : ( <>
-            <FlashList data={bookList} renderItem={({item}) => <Book book={item} />} estimatedItemSize={120} />
-          
-           
-            </>)
 
-        }
-       
-    </ScrollView>
-  )
+
+    return (
+        <ScrollView className="flex-1">
+            {booksData?.length && booksData?.length > 0 ? (
+                <>
+                    <SearchBar 
+                        onChangeText={(text: string) => setSearch(text)} 
+                        value={search} 
+                        placeholder="Search for book"
+                        showBorder={false} 
+                    />  
+                    <View className="flex flex-row justify-between items-center px-4">
+                        <Text className="font-base text-lg text-white/40">
+                            {filteredBooks.length} {filteredBooks.length > 1 ? 'Books' : 'Book'}
+                        </Text>
+                        <NativeDropDown items={[]} onSelect={() => {}} type='filter' />
+                    </View>
+                    <FlashList
+                        data={filteredBooks} // Use filtered data here
+                        renderItem={({item}) => <Book book={item} />}
+                        keyExtractor={(item) => item.id.toString()}
+                        estimatedItemSize={120}
+                    />
+                </>
+            ) : (
+                <View className="flex-1 items-center justify-center">
+                    <Text className="text-white/40 text-lg">No books found</Text>
+                </View>
+            )}
+        </ScrollView>
+    );
 }
