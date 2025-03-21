@@ -2,8 +2,8 @@ import BarChart from '@/components/BarChart'
 import BooksGoal from '@/components/BooksGoal'
 import Calendar from '@/components/Calendar'
 import GoalArc from '@/components/GoalArc'
-import { Icon } from '@/components/Icon'
 import LineChart from '@/components/LineChart'
+import LongestStreak from '@/components/LongestStreak'
 import NativeDropDown from '@/components/NativeDropDown'
 import { TimeSeriesResult, TimeUnit } from '@/services/booksService'
 import { booksService } from '@/services/booksService'
@@ -93,14 +93,12 @@ async function changeTimeUnit(time: string) {
     <StatsSeperate showBorder={false}/>
     <Text className='text-white text-xl font-semibold text-left px-4'>Yearly Reading Goal</Text>
       <HeaderSeperator />
-      <View className='flex-1 flex-col w-full h-full items-center justify-center'>
         <BooksGoal />
+        <View className='px-4 mt-6'>
+      <LongestStreak bookId={-1}/>
       </View>
-      <Text className='text-white text-lg font-regular text-center mt-2 '>Only <Text className='font-semibold'>20 more books </Text>to go in order to reach your goal, keep reading!</Text>
-      <HeaderSeperator />
-      <HeaderSeperator />
+      
 
-      <LongestStreak/>
       <StatsSeperate showBorder={true}/>
       <Text className='text-white text-xl font-medium text-left px-4'>Calendar</Text>
       <HeaderSeperator />
@@ -122,31 +120,4 @@ async function changeTimeUnit(time: string) {
   )
 }
 
-function LongestStreak() {
 
-  return (
-    
-    <View className="flex-1 flex-row  items-center gap-4 w-full p-4 ">
-      <View className="bg-white/15 p-4 gap-1 rounded-xl flex-1">
-      <View className="flex-row items-center justify-between ">
-      <Text className='text-white/40  font-medium '>Current Streak</Text>
-
-        <Icon name='flame' type='ionicons' size={28} color='red'/>
-      </View>
-        <Text className='text-white text-2xl font-semibold text-left'>100 days</Text>
-        </View>
-      <View className="bg-white/15 p-4 gap-1 rounded-xl flex-1">
-      <View className="flex-row items-center justify-between">
-      <Text className='text-white/40  font-medium text-left'>Longest Streak</Text>
-
-        <Icon name='calendar' type='ionicons' size={28} color='rgba(255,255,255,0.4)'/>
-
-      </View>
-      <Text className='text-white text-2xl font-semibold text-left'>100 <Text className='text-white/40 text-lg  font-medium '>days</Text></Text>
-      </View>
-    </View>
-  )
-
-
-
-}

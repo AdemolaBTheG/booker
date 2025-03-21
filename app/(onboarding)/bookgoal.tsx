@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from 'react-native'
-import React, { useState } from 'react'
+import React  from 'react'
 import { Icon } from '@/components/Icon'
-import { Link, router } from 'expo-router'
+import {  router } from 'expo-router'
 import { useGoalStore } from '@/stores/goalStore'
 export default function BookGoal() {
     const {bookGoal,increaseBookGoal,decreaseBookGoal} = useGoalStore()

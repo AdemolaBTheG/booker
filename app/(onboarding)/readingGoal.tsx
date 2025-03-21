@@ -1,6 +1,5 @@
 import { View, Text, Pressable } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { Icon } from '@/components/Icon'
+import React from 'react'
 import DatePicker from '@/components/DatePicker'
 import { router } from 'expo-router'
 import { useGoalStore } from '@/stores/goalStore'

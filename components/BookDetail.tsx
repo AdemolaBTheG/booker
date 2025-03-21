@@ -27,7 +27,7 @@ type BookDetailItemProps = {
   
   export default function  BookDetail({ book }: { book: Book }) {
     const details = [
-      { icon: "menu-book",type: 'material', label: 'Pages', value: book?.pageCount },
+      { icon: "menu-book",type: 'material', label: 'Pages', value: book?.pages },
       { icon: "earth",type: 'ionicons', label: 'Publisher', value: book?.publisher },
       { icon: "calendar-month",type: 'material', label: 'Published', value: book?.publishedDate },
       { icon: "barcode",type: 'ionicons', label: 'ISBN 10', value: book?.isbn_10 },

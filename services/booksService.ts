@@ -4,8 +4,8 @@ import 'react-native-url-polyfill/auto';
 import {  ExpoSQLiteDatabase} from 'drizzle-orm/expo-sqlite';
 import { books, DbReadingSession, readingSessions,DbBook } from '@/db/schema';
 import { db } from '@/lib/db';
-import { and, avg, count, eq, gte, lte, sql, SQL, sum,desc } from 'drizzle-orm';
-import { format, startOfYear, endOfYear, startOfMonth, endOfMonth, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, eachYearOfInterval, addDays, addWeeks, addMonths, addYears, eachHourOfInterval } from 'date-fns';
+import { and, avg, count, eq, gte, lte, sql, SQL, sum,desc, max } from 'drizzle-orm';
+import { format, startOfYear, endOfYear, startOfMonth, endOfMonth, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, eachYearOfInterval, addDays, addWeeks, addMonths, addYears, eachHourOfInterval, startOfDay, endOfDay, isToday, differenceInCalendarDays, isYesterday } from 'date-fns';
 
 export enum TimeUnit{
     HOUR = 'hour',
@@ -56,6 +56,229 @@ class BooksService {
         this.db = db;
     }
 
+    public async deleteBook(bookId: number): Promise<void>{
+        try{
+            await this.db.delete(books).where(eq(books.id, bookId));
+        }
+        catch(error){
+            console.error('Error deleting book:', error);
+        }
+    }
+
+    public async getBookCount(): Promise<number>{
+        try{
+            const result = await this.db.select({count: count()}).from(books);
+            return result[0]?.count || 0;
+        }
+        catch(error){
+            console.error('Error getting book count:', error);
+            return 0;
+        }
+    }
+
+    public async getCurrentBookReadingStreak(bookId: number): Promise<number> {
+        try {
+          // Get all reading sessions for this book, ordered by date (newest first)
+          const allSessions = await this.db.select({
+            ended_at: readingSessions.ended_at
+          })
+          .from(readingSessions)
+          .where(eq(readingSessions.bookId, bookId))
+          .orderBy(desc(readingSessions.ended_at));
+          
+          if (allSessions.length === 0) return 0;
+          
+          // Group sessions by day (using date string as key)
+          const sessionsByDay = new Map<string, boolean>();
+          
+          // Process all sessions and mark days when reading happened
+          allSessions.forEach(session => {
+            const date = new Date(session.ended_at);
+            const dayKey = startOfDay(date).toISOString();
+            sessionsByDay.set(dayKey, true);
+          });
+          
+          // Convert to array of dates when reading happened
+          const readingDays = Array.from(sessionsByDay.keys())
+            .map(dateStr => new Date(dateStr))
+            .sort((a, b) => b.getTime() - a.getTime()); // Newest first
+          
+          if (readingDays.length === 0) return 0;
+          
+          // Check if the user read today or yesterday (to maintain streak)
+          const mostRecentReadDay = readingDays[0];
+          const isActiveStreak = isToday(mostRecentReadDay) || isYesterday(mostRecentReadDay);
+          
+          if (!isActiveStreak) return 0; // Streak broken if not read today/yesterday
+          
+          // Count consecutive days
+          let currentStreak = 1; // Start with 1 for the most recent day
+          
+          for (let i = 0; i < readingDays.length - 1; i++) {
+            const currentDay = readingDays[i];
+            const previousDay = readingDays[i + 1];
+            
+            // Check if days are consecutive
+            const dayDifference = differenceInCalendarDays(currentDay, previousDay);
+            
+            if (dayDifference === 1) {
+              // Days are consecutive, increase streak
+              currentStreak++;
+            } else {
+              // Break in the streak
+              break;
+            }
+          }
+          
+          return currentStreak;
+        } catch (error) {
+          console.error(`Error calculating reading streak for book ${bookId}:`, error);
+          return 0;
+        }
+      }
+
+    public async getLongestReadingStreak(): Promise<number> {
+        try {
+          // Get all reading sessions, ordered by date
+          const allSessions = await this.db.select({
+            ended_at: readingSessions.ended_at
+          })
+          .from(readingSessions)
+          .orderBy(readingSessions.ended_at);
+          
+          if (allSessions.length === 0) return 0;
+          
+          // Group sessions by day (using date string as key)
+          const sessionsByDay = new Map<string, boolean>();
+          
+          // Process all sessions and mark days when reading happened
+          allSessions.forEach(session => {
+            const date = new Date(session.ended_at);
+            const dayKey = startOfDay(date).toISOString();
+            sessionsByDay.set(dayKey, true);
+          });
+          
+          // Convert to array of dates when reading happened
+          const readingDays = Array.from(sessionsByDay.keys())
+            .map(dateStr => new Date(dateStr))
+            .sort((a, b) => a.getTime() - b.getTime()); // Oldest first
+          
+          if (readingDays.length === 0) return 0;
+          
+          let longestStreak = 1;
+          let currentStreak = 1;
+          
+          // Iterate through sorted days to find streaks
+          for (let i = 1; i < readingDays.length; i++) {
+            const currentDay = readingDays[i];
+            const previousDay = readingDays[i - 1];
+            
+            // Check if days are consecutive
+            const dayDifference = differenceInCalendarDays(currentDay, previousDay);
+            
+            if (dayDifference === 1) {
+              // Days are consecutive, increase current streak
+              currentStreak++;
+              // Update longest streak if current is longer
+              longestStreak = Math.max(longestStreak, currentStreak);
+            } else if (dayDifference > 1) {
+              // Break in the streak, reset counter
+              currentStreak = 1;
+            }
+          }
+          
+          return longestStreak;
+        } catch (error) {
+          console.error('Error calculating longest reading streak:', error);
+          return 0;
+        }
+      }
+
+    public async getMaxDurationForToday(): Promise<number> {
+        try {
+          const today = new Date();
+          const startOfToday = startOfDay(today).getTime();
+          const endOfToday = endOfDay(today).getTime();
+          
+          const result = await this.db.select({
+            maxDuration: max(readingSessions.duration)
+          })
+          .from(readingSessions)
+          .where(
+            and(
+              gte(readingSessions.ended_at, startOfToday),
+              lte(readingSessions.ended_at, endOfToday)
+            )
+          );
+          
+          // Return the max duration or 0 if no sessions found
+          return result[0]?.maxDuration || 0;
+        } catch(error) {
+          console.error('Error getting max duration for today:', error);
+          return 0;
+        }
+      }
+
+      public async getCurrentReadingStreak(): Promise<number> {
+        try {
+          // Get all reading sessions, ordered by date (newest first)
+          const allSessions = await this.db.select({
+            ended_at: readingSessions.ended_at
+          })
+          .from(readingSessions)
+          .orderBy(desc(readingSessions.ended_at));
+          
+          if (allSessions.length === 0) return 0;
+          
+          // Group sessions by day (using date string as key)
+          const sessionsByDay = new Map<string, boolean>();
+          
+          // Process all sessions and mark days when reading happened
+          allSessions.forEach(session => {
+            const date = new Date(session.ended_at);
+            const dayKey = startOfDay(date).toISOString();
+            sessionsByDay.set(dayKey, true);
+          });
+          
+          // Convert to array of dates when reading happened
+          const readingDays = Array.from(sessionsByDay.keys())
+            .map(dateStr => new Date(dateStr)) 
+            .sort((a, b) => b.getTime() - a.getTime()); // Newest first
+          
+          if (readingDays.length === 0) return 0;
+          
+          // Check if the user read today or yesterday (to maintain streak)
+          const mostRecentReadDay = readingDays[0];
+          const isActiveStreak = isToday(mostRecentReadDay) || isYesterday(mostRecentReadDay);
+          
+          if (!isActiveStreak) return 0; // Streak broken if not read today/yesterday
+          
+          // Count consecutive days
+          let currentStreak = 1; // Start with 1 for the most recent day
+          
+          for (let i = 0; i < readingDays.length - 1; i++) {
+            const currentDay = readingDays[i];
+            const previousDay = readingDays[i + 1];
+            
+            // Check if days are consecutive
+            const dayDifference = differenceInCalendarDays(currentDay, previousDay);
+            
+            if (dayDifference === 1) {
+              // Days are consecutive, increase streak
+              currentStreak++;
+            } else {
+              // Break in the streak
+              break;
+            }
+          }
+          
+          return currentStreak;
+        } catch (error) {
+          console.error('Error calculating reading streak:', error);
+          return 0;
+        }
+      }
+
     public async getReadingSessions():Promise<DbReadingSession[]>{
         try{
             return await this.db.select().from(readingSessions);
@@ -69,7 +292,7 @@ class BooksService {
     public async getReadingSessionsByBook(){
 
         try{
-            return await this.db.select().from(readingSessions).groupBy(readingSessions.bookId);
+            return await this.db.select().from(readingSessions).groupBy(readingSessions.bookId).innerJoin(books, eq(readingSessions.bookId, books.id));
         }
         catch(error){
             console.error('Error getting reading sessions by book:', error);
@@ -152,6 +375,32 @@ class BooksService {
                 notOwnedCount: 0,
                 borrowedCount: 0
             };
+        }
+    }
+
+    public async upsertBook(book: Partial<DbBook>): Promise<number>{
+        try{
+            const {id, ...bookData} = book;
+
+            if(!id){
+                const result = await this.db.insert(books)
+                    .values(bookData as DbBook)
+                    .returning({insertedId: books.id});
+                return result[0]?.insertedId || 0;
+            }else{
+                const result = await this.db.insert(books)
+                    .values({...bookData, id} as DbBook)
+                    .onConflictDoUpdate({
+                        target: books.id,
+                        set: bookData
+                    })
+                    .returning({updatedId: books.id});
+                return result[0]?.updatedId || id;
+            }
+        }
+        catch(error){
+            console.error('Error upserting book:', error);
+            return -1;
         }
     }
 
@@ -751,6 +1000,69 @@ class BooksService {
         catch (error) {
             console.error('Error getting all books with latest session:', error);
             return [];
+        }
+    }
+
+    /**
+     * Gets the longest reading streak for a specific book, regardless of whether it's current
+     * @param bookId The ID of the book to check
+     * @returns The longest streak (in days) for the book
+     */
+    public async getLongestBookReadingStreak(bookId: number): Promise<number> {
+        try {
+            // Get all reading sessions for this book, ordered by date
+            const allSessions = await this.db.select({
+                ended_at: readingSessions.ended_at
+            })
+            .from(readingSessions)
+            .where(eq(readingSessions.bookId, bookId))
+            .orderBy(readingSessions.ended_at);
+            
+            if (allSessions.length === 0) return 0;
+            
+            // Group sessions by day (using date string as key)
+            const sessionsByDay = new Map<string, boolean>();
+            
+            // Process all sessions and mark days when reading happened
+            allSessions.forEach(session => {
+                const date = new Date(session.ended_at);
+                const dayKey = startOfDay(date).toISOString();
+                sessionsByDay.set(dayKey, true);
+            });
+            
+            // Convert to array of dates when reading happened
+            const readingDays = Array.from(sessionsByDay.keys())
+                .map(dateStr => new Date(dateStr))
+                .sort((a, b) => a.getTime() - b.getTime()); // Oldest first
+            
+            if (readingDays.length === 0) return 0;
+            
+            let longestStreak = 1;
+            let currentStreak = 1;
+            
+            // Iterate through sorted days to find streaks
+            for (let i = 1; i < readingDays.length; i++) {
+                const currentDay = readingDays[i];
+                const previousDay = readingDays[i - 1];
+                
+                // Check if days are consecutive
+                const dayDifference = differenceInCalendarDays(currentDay, previousDay);
+                
+                if (dayDifference === 1) {
+                    // Days are consecutive, increase current streak
+                    currentStreak++;
+                    // Update longest streak if current is longer
+                    longestStreak = Math.max(longestStreak, currentStreak);
+                } else if (dayDifference > 1) {
+                    // Break in the streak, reset counter
+                    currentStreak = 1;
+                }
+            }
+            
+            return longestStreak;
+        } catch (error) {
+            console.error(`Error calculating longest reading streak for book ${bookId}:`, error);
+            return 0;
         }
     }
 }

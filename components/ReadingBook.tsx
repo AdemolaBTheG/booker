@@ -34,59 +34,70 @@ export default function ReadingBook() {
           exiting={FadeOutUp} 
           layout={LinearTransition.springify()}
         >
+          
+          
           <ScrollView 
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingLeft: 4, paddingRight: 16 }}
           >
-            {data?.map((book) => (
-              book.latestSession && (
-                
-                <Animated.View 
-                  key={book.id} 
-                  className='flex-row bg-white/15 px-3 py-3 items-center justify-center mr-4' 
-                  style={{borderRadius: 28}} 
-                  entering={FadeInUp} 
-                  exiting={FadeOutUp} 
-                  layout={LinearTransition.springify()}
-                >
-                  <View className="flex-row   gap-3">
-                    <Image 
-                      source={{uri: book.thumbnail.replace('http://', 'https://')}} 
-                      contentFit='cover' 
-                      style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 12}} 
-                    />
-                    <View className='flex-col gap-1' style={{width: 170}}>
-                      <Text 
-                        className='text-white text-base font-medium' 
-                        style={{lineHeight: 16}} 
-                        numberOfLines={2} 
-                        ellipsizeMode='tail'
-                      >
-                        {book.title}
-                      </Text>
-                      <Text className=' font-medium' numberOfLines={2} 
- style={{fontSize:12, height: 35, color: 'rgba(255,255,255,0.5)'}}>
-                        {book.authors}
-                      </Text>
-                      {book.latestSession && book.latestSession.pagesRead > 0 && (
-                        <ProgressBar 
-                          progress={(book.latestSession.pagesRead + book.latestSession.startedAtPage) / book.pages}
-                        />
-                      )}
+            {data && data.length > 1 ? (
+              data.map((book) => (
+                book.latestSession && (
+                  
+                  <Animated.View 
+                    key={book.id} 
+                    className='flex-row bg-white/15 px-3 py-3 items-center justify-center mr-4' 
+                    style={{borderRadius: 28}} 
+                    entering={FadeInUp} 
+                    exiting={FadeOutUp} 
+                    layout={LinearTransition.springify()}
+                  >
+                    <View className="flex-row   gap-3">
+                      <Image 
+                        source={{uri: book.thumbnail.replace('http://', 'https://')}} 
+                        contentFit='cover' 
+                        style={{width: CALCULATED_WIDTH, height: DESIRED_HEIGHT, borderRadius: 12}} 
+                      />
+                      <View className='flex-col gap-1' style={{width: 170}}>
+                        <Text 
+                          className='text-white text-base font-medium' 
+                          style={{lineHeight: 16}} 
+                          numberOfLines={2} 
+                          ellipsizeMode='tail'
+                        >
+                          {book.title}
+                        </Text>
+                        <Text className=' font-medium' numberOfLines={2} 
+   style={{fontSize:12, height: 35, color: 'rgba(255,255,255,0.5)'}}>
+                          {book.authors}
+                        </Text>
+                        {book.latestSession && book.latestSession.pagesRead > 0 && (
+                          <ProgressBar 
+                            progress={(book.latestSession.pagesRead + book.latestSession.startedAtPage) / book.pages}
+                          />
+                        )}
+                      </View>
                     </View>
-                  </View>
-                  <Link href={`/(books)/${book.id}/timer`}>
-                    <Icon 
-                      name="play-circle" 
-                      size={42} 
-                      color='#513EC7' 
-                      type='ionicons' 
-                    />
-                  </Link>
-                </Animated.View>
-              )
-            ))}
+                    <Link href={`/(books)/${book.id}/timer`}>
+                      <Icon 
+                        name="play-circle" 
+                        size={42} 
+                        color='#513EC7' 
+                        type='ionicons' 
+                      />
+                    </Link>
+                  </Animated.View>
+                )
+              ))
+            ) : (
+              <Animated.View  entering={FadeInUp} 
+              exiting={FadeOutUp} 
+              layout={LinearTransition.springify()}  className='flex-row items-center justify-center bg-red-500'>
+                <Text className='text-white text-center text-lg font-bold '>You are currently not reading any books</Text>
+              </Animated.View >
+            )}
+           
           </ScrollView>
         </Animated.View>
       )}

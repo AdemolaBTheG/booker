@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 import { Icon } from './Icon'
 
@@ -11,13 +11,22 @@ export type NativeDropDownProps = {
     iconAndroid?:string,
   }>
   onSelect: (value: string) => void,
-
-  type: 'stats' | 'edit' | 'filter' | 'add'
+  selected?: string,
+  type: 'stats' | 'edit' | 'filter' | 'add' | 'item'
 }
 
-export default function NativeDropDown({ items, onSelect,type }: NativeDropDownProps) {
+export default function NativeDropDown({ items, onSelect,type, selected }: NativeDropDownProps) {
 
-  const [selectedItem, setSelectedItem] = useState<NativeDropDownProps['items'][number]  | null>(type === 'edit' ? null : items[0])
+  const foundItem = items.find(item => item.title === selected)
+  console.log(selected)
+  console.log( "foundItem", foundItem)
+  const [selectedItem, setSelectedItem] = useState<NativeDropDownProps['items'][number] | null>(null)
+
+  useEffect(() => {
+    setSelectedItem(selected && foundItem ? foundItem : (items.length > 0 ? items[0] : null))
+  }, [selected])
+
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -40,6 +49,10 @@ export default function NativeDropDown({ items, onSelect,type }: NativeDropDownP
             <>
             <Icon name="add-circle" className='mr-4' size={32} color="#513EC7" type="material" />
             </>
+          ) : type === 'item' ? (
+            <>
+            <Icon name="ellipsis-horizontal-circle-outline" size={28} color="white" type="ionicons" />
+            </>
           ) : (
             <></>
           )}
@@ -53,7 +66,7 @@ export default function NativeDropDown({ items, onSelect,type }: NativeDropDownP
       
       <DropdownMenu.Group>
         {items.map((item) => (
-          <DropdownMenu.Item  key={item.key} onSelect={() => {onSelect(item.title), setSelectedItem(item)}}>
+          <DropdownMenu.Item  destructive={item.title === 'Delete'} key={item.key} onSelect={() => {onSelect(item.title), setSelectedItem(item)}}>
             <DropdownMenu.ItemTitle>{item.title}</DropdownMenu.ItemTitle>
             <DropdownMenu.ItemIcon 
             ios={

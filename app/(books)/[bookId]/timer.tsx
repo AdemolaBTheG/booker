@@ -1,11 +1,11 @@
 import { View, Text, ImageBackground, Pressable, AppState, Alert } from 'react-native'
-import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { DbBook } from '@/db/schema';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { router, useLocalSearchParams } from 'expo-router';
 import { booksService } from '@/services/booksService';
 import { Image } from 'expo-image';
 import { BlurView } from 'expo-blur';
 import { Icon } from '@/components/Icon';
+import { useQuery } from '@tanstack/react-query/build/legacy/useQuery';
 
 // Types
 interface TimerState {
@@ -76,10 +76,9 @@ const TimerControls = React.memo(({
 export default function Timer() {
   const DESIRED_HEIGHT = 300; 
   const aspectRatio = 42.67/61.33;
-  const CALCULATED_WIDTH = Math.round(DESIRED_HEIGHT * aspectRatio);
+  const CALCULATED_WIDTH = useMemo(() => Math.round(DESIRED_HEIGHT * aspectRatio), [DESIRED_HEIGHT, aspectRatio]);
   
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
-  const [book, setBook] = useState<DbBook | null>(null);
   const [timerState, setTimerState] = useState<TimerState>({
     isRunning: false,
     startTime: null,
@@ -93,13 +92,12 @@ export default function Timer() {
   const lastTickTimeRef = useRef<number | null>(null);
 
   // Fetch book data
-  useEffect(() => {
-    const fetchBook = async () => {
-      const book = await booksService.getBookById(bookId);
-      setBook(book);
-    };
-    fetchBook();
-  }, [bookId]);
+  const {data: book} = useQuery({
+    queryKey: ['book'],
+    queryFn: async() => {
+      return await booksService.getBookById(bookId as string);
+    }
+  })
 
   // Clean up on unmount
   useEffect(() => {

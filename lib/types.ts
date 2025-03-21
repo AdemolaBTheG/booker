@@ -8,7 +8,7 @@ export interface Book {
     publisher?: string,
     publishedDate?: string,
     description?: string,
-    pageCount?: number,
+    pages?: number,
     isbn_10?: string,
     isbn_13?: string,
     thumbnail?: string,
@@ -49,16 +49,21 @@ export interface ReadingSession {
 export const bookSchema = z.object({
     title: z.string({message:"Title is required"}).min(1),
     authors: z.array(z.string()).optional(),
-    pages: z.string({message:"Pages is required"}).min(1),
+    pages: z.string()
+    .min(1, {message: "Pages is required"})
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => !isNaN(val) && val >= 1, {
+      message: "Pages must be at least 1"
+    }),
     publisher: z.string().optional(),
     publishedDate: z.string().optional(),
     description: z.string().optional(),
     isbn_10: z.string().optional(),
     isbn_13: z.string().optional(),
     thumbnail: z.string().optional(),
-    readingStatus: z.string({message:"Reading Status is required"}),
-    ownershipStatus: z.string({message:"Ownership Status is required"}),
-    format: z.string({message: 'Format is required'}),
+    readingStatus: z.string({message:"Reading Status is required"}).min(1),
+    ownershipStatus: z.string({message:"Ownership Status is required"}).min(1),
+    format: z.string({message: 'Format is required'}).min(1),
 })
 
 export type NewBook = typeof books.$inferInsert

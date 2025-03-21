@@ -1,4 +1,4 @@
-import { Link, router, Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { Text } from "react-native";
 
 export default function OnboardingLayout() {

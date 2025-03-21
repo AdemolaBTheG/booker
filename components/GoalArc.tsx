@@ -1,19 +1,20 @@
 import { View, Text } from 'react-native'
 import React, { useEffect } from 'react'
 import { Dimensions } from 'react-native'
-import { Canvas,Path, Skia,Text as SkiaText } from '@shopify/react-native-skia'
-import Animated, { ReduceMotion, useAnimatedProps, useSharedValue, withTiming,Easing } from 'react-native-reanimated'
+import { Canvas,Path, Skia } from '@shopify/react-native-skia'
+import Animated, { ReduceMotion, useSharedValue, withTiming,Easing } from 'react-native-reanimated'
 import { useGoalStore } from '@/stores/goalStore'
+import { booksService } from '@/services/booksService'
+import { useQuery } from '@tanstack/react-query';
 const {width} = Dimensions.get('window')
-const {height} = Dimensions.get('window')
 
 
 export default function GoalArc() {
+  
     const {readingGoal} = useGoalStore()
-    console.log("This is the reading goal",readingGoal)
     const date = new Date(readingGoal);
-    const totalMinutes = date.getHours() * 60 + date.getMinutes();
-    console.log("This is the total minutes",totalMinutes)
+    const goalMinutes = date.getHours() * 60 + date.getMinutes();
+    console.log("This is the total minutes",goalMinutes)
     const strokeWidth = 10;
     const center = width / 2;
     const r = (width - strokeWidth) / 2 - 40;
@@ -28,12 +29,17 @@ export default function GoalArc() {
     const skiaBackgroundPath = Skia.Path.MakeFromSVGString(backgroundPath)
     const foregroundPath = `M ${x2} ${y2} A ${r} ${r} 1 0 1 ${x1} ${y1}`
     const skiaForegroundPath = Skia.Path.MakeFromSVGString(foregroundPath)
-    const progress = 0.6 //change to actual progress
     const animatedProgress = useSharedValue(0);
-
-
+    const {data: maxDuration} = useQuery({
+        queryKey: ['maxDuration'],
+        queryFn: () => booksService.getMaxDurationForToday()
+    })
+    const actualMinutes = maxDuration ? maxDuration / (1000 * 60) : 0;
+    console.log("This is the actual minutes",actualMinutes)
+    const percentage = Math.min(100, (actualMinutes / goalMinutes) );
+    console.log("This is the percentage",percentage)
     useEffect(() => {
-        animatedProgress.value = withTiming(progress, {
+        animatedProgress.value = withTiming(percentage, {
             duration: 1500,
             easing: Easing.bezier(0.46, -0.09, 0.25, 1.06),
             reduceMotion: ReduceMotion.System,
@@ -57,8 +63,8 @@ export default function GoalArc() {
       </Canvas>
       <View  style={{position: 'absolute',flexDirection: 'column',alignItems: 'center',bottom: 0}}>
         <Text className='text-white text-lg font-medium'>Todays Reading Activity</Text>
-        <Text className='text-white text-6xl font-medium '>00:00</Text>
-        <Text className='text-white text-base'>of your {totalMinutes}-Minutes-goal</Text> 
+        <Text className='text-white text-6xl font-medium '>{actualMinutes.toFixed(0)}:00</Text>
+        <Text className='text-white text-base'>of your {goalMinutes}-Minutes-goal</Text> 
       </View>
       </View>
   )

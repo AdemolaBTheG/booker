@@ -173,8 +173,7 @@ export default function RootLayout() {
     
 
       <Stack.Screen name="(books)/[bookId]/item" options={{
-          headerShown: true,
-          headerTitle: 'Book Details',
+          headerShown: false,
       }} />
 
       <Stack.Screen name="(books)/[bookId]/timer" options={{

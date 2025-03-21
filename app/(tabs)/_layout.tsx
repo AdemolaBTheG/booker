@@ -1,9 +1,11 @@
 import { Icon } from '@/components/Icon'
 import { Tabs, useRouter } from 'expo-router'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Pressable, View, Text } from 'react-native'
-import { BlurView } from 'expo-blur';
 import NativeDropDown from '@/components/NativeDropDown'
+import Purchases from 'react-native-purchases'
+import { useQuery } from '@tanstack/react-query'
+import { booksService } from '@/services/booksService'
 
 const addItems = [
   {
@@ -25,10 +27,32 @@ const addItems = [
 
 ]
 export default function TabLayout() {
+
+  const [isActive, setIsActive] = useState(false);
+
+  const {data: bookCount} = useQuery({
+    queryKey: ['bookCount'],
+
+    queryFn: () => booksService.getBookCount(),
+   
+  })
+  console.log("bookCount", bookCount)
+  
+  useEffect(() => {
+    const getCustomerInfo = async () => {
+      const customerInfo = (await Purchases.getCustomerInfo()).entitlements.active['Plus'] !== undefined
+      setIsActive(customerInfo);
+    }
+    getCustomerInfo();
+  }, []);
   const router = useRouter();
+  console.log("isActive", isActive)
 
   function onSelect(title: string) {
-   
+    
+   if(bookCount && bookCount > 3 && !isActive){
+    router.push('/paywall')
+   }
     if(title === 'Search Books '){
       router.push('/(add)')
     }
